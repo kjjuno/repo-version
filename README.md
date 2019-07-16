@@ -16,6 +16,7 @@ git workflow that I use. Below are my initial thoughts for the first version.
 
 ## Versioning Rules
 
+```
 major.minor.patch.commits-since-last-tag
 
 master: 0.1.0.0
@@ -23,6 +24,7 @@ branch: 0.1.1-branch-name-abbrev0001 or 0.1.1-branch-name-abbrev.1
     where the final number is the number of commits since the tag
 merge
 master: 0.1.1.2 (should tag at this point)
+```
 
 1.0.0 features and assumptions
 
