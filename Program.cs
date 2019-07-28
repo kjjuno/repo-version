@@ -1,6 +1,8 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using LibGit2Sharp;
+using Newtonsoft.Json;
 using Version = System.Version;
 
 namespace repo_version
@@ -21,8 +23,26 @@ namespace repo_version
 
         static void Main(string[] args)
         {
-            var path = "/Users/i50331/git/xactimate/core";
-            Repository r = new Repository(path);
+            var path = ".";
+            if (args.Length > 0)
+            {
+                path = args[0];
+            }
+
+            var curr = new DirectoryInfo(path);
+
+            while (curr != null && !Directory.Exists(Path.Combine(curr.FullName, ".git")))
+            {
+                curr = curr.Parent;
+            }
+
+            if (curr == null)
+            {
+                Console.WriteLine("not a git repository");
+                return;
+            }
+
+            Repository r = new Repository(curr.FullName);
 
             var query = from t in r.Tags
                 let v = ParseVersion(t.FriendlyName)
@@ -31,7 +51,7 @@ namespace repo_version
                 select new
                 {
                     Tag = t,
-                        Version = v
+                    Version = v
                 };
 
             var latest = query.FirstOrDefault();
@@ -42,13 +62,13 @@ namespace repo_version
                 select new
                 {
                     Commit = commit,
-                           Tag = t
+                    Tag = t
                 };
 
             var lookup = q.ToLookup(x => x.Commit.Id, x => x.Tag);
 
             var count = 0;
-            var version = new Version("0.1.0");
+            var version = new Version("0.0.0");
             foreach (var commit in r.Commits)
             {
                 var t = lookup[commit.Id];
@@ -66,15 +86,31 @@ namespace repo_version
             var patch = version.Build;
             var preReleaseTag = CalculatePreReleaseTag(r);
 
-
-            if (count > 0)
+            // If nothing bumped it from the initial version
+            // set the version to 0.1.0
+            if (major == 0 & minor == 0 && patch == 0)
+            {
+                minor = 1;
+            }
+            else if (count > 0)
             {
                 patch++;
             }
 
-            Console.WriteLine("SemVer: {0}", SemVer(major, minor, patch, preReleaseTag, count));
-            Console.WriteLine("FullSemVer: {0}", FullSemVer(major, minor, patch, preReleaseTag, count));
-            Console.WriteLine("NuGetVersion: {0}", NuGetVersion(major, minor, patch, preReleaseTag, count));
+
+            var response = new
+            {
+                SemVer = SemVer(major, minor, patch, preReleaseTag, count),
+                FullSemVer = FullSemVer(major, minor, patch, preReleaseTag, count),
+                NuGetVersion = NuGetVersion(major, minor, patch, preReleaseTag, count),
+                Major = major,
+                Minor = minor,
+                Patch = patch,
+                Commits = count,
+                PreReleaseTag = preReleaseTag
+            };
+
+            Console.WriteLine(JsonConvert.SerializeObject(response, Formatting.Indented));
         }
 
         private static string FullSemVer(int major, int minor, int patch, string preReleaseTag, int commits)
