@@ -5,56 +5,130 @@ using Version = System.Version;
 
 namespace repo_version
 {
-	class Program
-	{
-		static Version ParseVersion(string input)
-		{
-			var str = input.TrimStart('v', 'V');
+    class Program
+    {
+        static Version ParseVersion(string input)
+        {
+            var str = input.TrimStart('v', 'V');
 
-			if (!Version.TryParse(str, out var v))
-			{
-				return null;
-			}
+            if (!Version.TryParse(str, out var v))
+            {
+                return null;
+            }
 
-			return v;
-		}
+            return v;
+        }
 
-		static void Main(string[] args)
-		{
-			Repository r = new Repository("/home/kjjuno/git/claims/services/external-api");
+        static void Main(string[] args)
+        {
+            var path = "/Users/i50331/git/xactimate/core";
+            Repository r = new Repository(path);
 
-			Console.WriteLine("Current Branch: {0}", r.Head.FriendlyName);
+            var query = from t in r.Tags
+                let v = ParseVersion(t.FriendlyName)
+                where v != null
+                orderby v descending
+                select new
+                {
+                    Tag = t,
+                        Version = v
+                };
 
-			var query = from t in r.Tags
-						let v = ParseVersion(t.FriendlyName)
-						where v != null
-						orderby v descending
-						select new
-						{
-							Tag = t,
-							Version = v
-						};
+            var latest = query.FirstOrDefault();
 
-			var latest = query.FirstOrDefault();
+            var q = from t in r.Tags
+                let commit = t.PeeledTarget
+                where commit != null
+                select new
+                {
+                    Commit = commit,
+                           Tag = t
+                };
 
-			if (latest != null)
-			{
-				Console.WriteLine("Last Version: {0}", latest.Tag.FriendlyName);
-				var filter = new CommitFilter();
-				filter.ExcludeReachableFrom = latest.Tag.CanonicalName;
-				filter.IncludeReachableFrom = r.Head.Tip.Sha;
+            var lookup = q.ToLookup(x => x.Commit.Id, x => x.Tag);
 
-				var commits = r.Commits.QueryBy(filter).Count();
-				Console.WriteLine("Commits: {0}", commits);
-				var version = latest.Version;
+            var count = 0;
+            var version = new Version("0.1.0");
+            foreach (var commit in r.Commits)
+            {
+                var t = lookup[commit.Id];
+                var tag = t.FirstOrDefault()?.FriendlyName.TrimStart('v', 'V');
 
-				if (commits > 0)
-				{
-					version = new Version(version.Major, version.Minor, version.Build + 1);
-				}
+                if (!string.IsNullOrEmpty(tag) && Version.TryParse(tag, out var v))
+                {
+                    version = v;
+                    break;
+                }
+                count++;
+            }
+            var major = version.Major;
+            var minor = version.Minor;
+            var patch = version.Build;
+            var preReleaseTag = CalculatePreReleaseTag(r);
 
-				Console.WriteLine("Version: {0}", version);
-			}
-		}
-	}
+
+            if (count > 0)
+            {
+                patch++;
+            }
+
+            Console.WriteLine("SemVer: {0}", SemVer(major, minor, patch, preReleaseTag, count));
+            Console.WriteLine("FullSemVer: {0}", FullSemVer(major, minor, patch, preReleaseTag, count));
+            Console.WriteLine("NuGetVersion: {0}", NuGetVersion(major, minor, patch, preReleaseTag, count));
+        }
+
+        private static string FullSemVer(int major, int minor, int patch, string preReleaseTag, int commits)
+        {
+            if (!string.IsNullOrEmpty(preReleaseTag))
+            {
+                return $"{major}.{minor}.{patch}-{preReleaseTag}.{commits}";
+            }
+
+            if (commits > 0)
+            {
+                return $"{major}.{minor}.{patch}+{commits}";
+            }
+
+            return $"{major}.{minor}.{patch}";
+        }
+
+        private static string SemVer(int major, int minor, int patch, string preReleaseTag, int commits)
+        {
+            if (!string.IsNullOrEmpty(preReleaseTag))
+            {
+                return $"{major}.{minor}.{patch}-{preReleaseTag}.{commits}";
+            }
+
+            return $"{major}.{minor}.{patch}";
+        }
+
+        private static string NuGetVersion(int major, int minor, int patch, string preReleaseTag, int commits)
+        {
+            if (!string.IsNullOrEmpty(preReleaseTag))
+            {
+                preReleaseTag = preReleaseTag.Substring(0, Math.Min(16, preReleaseTag.Length)).ToLower();
+                return $"{major}.{minor}.{patch}-{preReleaseTag}{commits:D4}";
+            }
+
+            return $"{major}.{minor}.{patch}";
+        }
+
+        private static string CalculatePreReleaseTag(Repository r)
+        {
+            var preReleaseTag = "";
+            var branch = r.Head.FriendlyName;
+            if (branch != "master")
+            {
+                var idx = branch.LastIndexOf('/');
+                if (idx > 0)
+                {
+                    preReleaseTag = branch.Substring(idx + 1);
+                }
+                preReleaseTag = preReleaseTag.Replace('_', '-').Substring(0, Math.Min(30, preReleaseTag.Length));
+            }
+
+            return preReleaseTag;
+        }
+
+    }
 }
