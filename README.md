@@ -38,3 +38,6 @@ master: 0.1.1.2 (should tag at this point)
 I would like to implement this using something cross platform. It MUST be available to mac, windows, and linux as I will need it on all of those operating systems. It should be easy to install, and should feel native.
 
 I am most familiar with .net core, which could be a suitable choice, but I also think that Go would be a great choice.
+
+## Wish List
+- Query .git folder directly. Shouldn't need to bind to libgit or any of the wrappers. We don't need full git support, just the ability to figure out the first reachable tag from HEAD, and the number of commits between HEAD and that tag.
