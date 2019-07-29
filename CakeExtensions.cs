@@ -23,13 +23,13 @@ namespace repo_version
         }
 
         [CakeMethodAlias]
-        public static string CalculateVersion(this ICakeContext context)
+        public static object CalculateVersion(this ICakeContext context)
         {
             return CalculateVersion(context, ".");
         }
 
         [CakeMethodAlias]
-        public static string CalculateVersion(this ICakeContext context, string path)
+        public static object CalculateVersion(this ICakeContext context, string path)
         {
             var curr = new DirectoryInfo(path);
 
@@ -112,7 +112,7 @@ namespace repo_version
                 PreReleaseTag = preReleaseTag
             };
 
-            return response.SemVer;
+            return response;
         }
 
         private static string FullSemVer(int major, int minor, int patch, string preReleaseTag, int commits)

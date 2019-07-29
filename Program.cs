@@ -19,8 +19,7 @@ namespace repo_version
 
             var response = VersionCalculator.CalculateVersion(null);
 
-            //Console.WriteLine(JsonConvert.SerializeObject(response, Formatting.Indented));
-            Console.WriteLine(response);
+            Console.WriteLine(JsonConvert.SerializeObject(response, Formatting.Indented));
         }
 
 
