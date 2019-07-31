@@ -1,14 +1,14 @@
 #!/usr/bin/env pwsh
 
 Param(
-    [switch] $ApplyTag
+    [switch] $Tag
 )
 
 $repoVersion = (dotnet run | ConvertFrom-Json)
 
 $semVer = $repoVersion.SemVer;
 
-if ($ApplyTag) {
+if ($Tag) {
     git tag $semVer
 }
 
