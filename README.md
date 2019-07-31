@@ -18,6 +18,13 @@ During your development you currently have 3 commits on your feature branch.
 
 ```
 $ repo-version
+1.2.2.3-fix-null-reference
+```
+
+or for more verbose output
+
+```
+$ repo-version -o json
 {
     "SemVer": "1.2.3.3-fix-null-reference",
     "Major": "1",
@@ -34,15 +41,7 @@ Now on the master branch we run `repo-version` again.
 
 ```
 $ repo-version
-{
-    "SemVer": "1.2.3.4",
-    "Major": "1",
-    "Minor": "2",
-    "Patch": "3",
-    "Commits": "4",
-    "PreReleaseTag": ""
-}
-
+1.2.3.4
 ```
 
 ## Why not just use GitVersion?
