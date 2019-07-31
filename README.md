@@ -44,6 +44,15 @@ $ repo-version
 1.2.3.4
 ```
 
+When you are ready to finish the 1.2.3.x release you should tag the final commit.
+
+```
+git tag $(repo-version)
+git push --tags
+```
+
+The next commit will be be automatically bumped to `1.2.4.1`
+
 ## Why not just use GitVersion?
 
 For years now I have used GitVersion, but I have a few gripes with it. First, I almost always
