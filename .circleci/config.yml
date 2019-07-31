@@ -6,6 +6,6 @@ jobs:
     steps:
       - checkout
       - run:
-        name: Run Build Script
-        command:
+          name: Run Build Script
+          command:
             dotnet run
