@@ -79,6 +79,7 @@ namespace repo_version
             var major = version.Major;
             var minor = version.Minor;
             var patch = version.Build;
+            var commits = version.Revision;
             var preReleaseTag = CalculatePreReleaseTag(r);
 
             // If nothing bumped it from the initial version
@@ -90,16 +91,17 @@ namespace repo_version
             else if (count > 0)
             {
                 patch++;
+                commits = count;
             }
 
 
             var response = new
             {
-                SemVer = SemVer(major, minor, patch, preReleaseTag, count),
+                SemVer = SemVer(major, minor, patch, preReleaseTag, commits),
                 Major = major,
                 Minor = minor,
                 Patch = patch,
-                Commits = count,
+                Commits = commits,
                 PreReleaseTag = preReleaseTag
             };
 
