@@ -1,7 +1,49 @@
 # repo-version
-automatic versioning for git repositories
+Automatic versioning for git repositories based tags, and the number of commits since the last tag.
 
-This repository is in the very infant stages. The design is still being considered and is very likely to change.
+## Install
+
+```
+dotnet tool install -g repo-version
+```
+
+## Usage
+
+You need to be somewhere within a git repository to run `repo-version`. Alternatively, you can provide a path as an argument.
+
+Let's say you have branched off of master at tag 1.2.2.1 and created a branch named `feature/fix-null-reference`.
+During your development you currently have 3 commits on your feature branch.
+
+```
+$ repo-version
+{
+    "SemVer": "1.2.3.3-fix-null-reference",
+    "Major": "1",
+    "Minor": "2",
+    "Patch": "3",
+    "Commits": "3",
+    "PreReleaseTag": "fix-null-reference"
+}
+
+```
+
+Now, let's say that your branch is ready to be merged, and you use a merge commit strategy. This will add 1 more commit.
+Now on the master branch we run `repo-version` again.
+
+```
+$ repo-version
+{
+    "SemVer": "1.2.3.4",
+    "Major": "1",
+    "Minor": "2",
+    "Patch": "3",
+    "Commits": "4",
+    "PreReleaseTag": ""
+}
+
+```
+
+## Why not just use GitVersion?
 
 For years now I have used GitVersion, but I have a few gripes with it. First, I almost always
 use GitHubFlow, or at least I tend to branch from master, and merge to master. I find myself
@@ -19,9 +61,8 @@ git workflow that I use. Below are my initial thoughts for the first version.
 ```
 major.minor.patch.commits-since-last-tag
 
-master: 0.1.0.0
-branch: 0.1.1-branch-name-abbrev0001 or 0.1.1-branch-name-abbrev.1
-    where the final number is the number of commits since the tag
+master: 0.1.0.0 branch: 0.1.1.1-branch-name-abbrev
+    where the final number is the number of commits since the last tag
 merge
 master: 0.1.1.2 (should tag at this point)
 ```
@@ -34,10 +75,3 @@ master: 0.1.1.2 (should tag at this point)
 4. patch and commits are controlled by commits since tag.
 5. only need current branch to calculate version (no more bad versions without master)
 
-## Language choice
-I would like to implement this using something cross platform. It MUST be available to mac, windows, and linux as I will need it on all of those operating systems. It should be easy to install, and should feel native.
-
-I am most familiar with .net core, which could be a suitable choice, but I also think that Go would be a great choice.
-
-## Wish List
-- Query .git folder directly. Shouldn't need to bind to libgit or any of the wrappers. We don't need full git support, just the ability to figure out the first reachable tag from HEAD, and the number of commits between HEAD and that tag.
