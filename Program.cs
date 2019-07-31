@@ -183,9 +183,13 @@ namespace repo_version
             if (branch != "master")
             {
                 var idx = branch.LastIndexOf('/');
-                if (idx > 0)
+                if (idx >= 0)
                 {
                     preReleaseTag = branch.Substring(idx + 1);
+                }
+                else
+                {
+                    preReleaseTag = branch;
                 }
                 preReleaseTag = preReleaseTag.Replace('_', '-').Substring(0, Math.Min(30, preReleaseTag.Length));
             }
