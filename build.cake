@@ -9,7 +9,7 @@ Task("Pack")
         IEnumerable<string> redirectedStandardOutput;
         var exitCodeWithArgument = StartProcess("dotnet", new ProcessSettings 
             {
-                Arguments = "run",
+                Arguments = "run --output json",
                 RedirectStandardOutput = true
             },
             out redirectedStandardOutput);

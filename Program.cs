@@ -4,25 +4,83 @@ using System.Linq;
 using LibGit2Sharp;
 using Newtonsoft.Json;
 using Version = System.Version;
+using CommandLine;
+using System.Collections.Generic;
 
 namespace repo_version
 {
+    class RepoVersion
+    {
+        public string SemVer
+        {
+            get
+            {
+                if (!string.IsNullOrEmpty(PreReleaseTag))
+                {
+                    return $"{Major}.{Minor}.{Patch}.{Commits}-{PreReleaseTag}";
+                }
+
+                return $"{Major}.{Minor}.{Patch}.{Commits}";
+            }
+        }
+        public int Major { get; set; }
+        public int Minor { get; set; }
+        public int Patch { get; set; }
+        public int Commits { get; set; }
+        public string PreReleaseTag { get; set; }
+
+        public override string ToString()
+        {
+            return SemVer;
+        }
+    }
+
+    class Options
+    {
+        [Option('o', "output",
+            Default = "semver",
+            HelpText = "The output format. Should be one of [semver, json]")]
+        public string Format { get; set; }
+
+        [Value(0,
+            MetaName = "path",
+            Default = ".",
+            HelpText = "Path to a git repository.")]
+        public string Path { get; set; }
+    }
+
     class Program
     {
         static void Main(string[] args)
         {
-            var path = ".";
-            if (args.Length > 0)
-            {
-                path = args[0];
-            }
-
-            var response = CalculateVersion(path);
-
-            Console.WriteLine(JsonConvert.SerializeObject(response, Formatting.Indented));
+            Parser.Default.ParseArguments<Options>(args)
+                .WithParsed<Options>(options => RunOptionsAndReturnExitCode(options))
+                .WithNotParsed<Options>((errors) => HandleParseErrors(errors));
         }
 
-        public static object CalculateVersion(string path)
+        private static void RunOptionsAndReturnExitCode(Options options)
+        {
+            var response = CalculateVersion(options.Path);
+
+            if (string.Compare(options.Format, "json", StringComparison.OrdinalIgnoreCase) == 0)
+            {
+                Console.WriteLine(JsonConvert.SerializeObject(response, Formatting.Indented));
+            }
+            else
+            {
+                Console.WriteLine(response.SemVer);
+            }
+
+            Environment.ExitCode = 0;
+        }
+
+        private static void HandleParseErrors(IEnumerable<Error> errors)
+        {
+            Console.WriteLine();
+            Environment.ExitCode = 1;
+        }
+
+        public static RepoVersion CalculateVersion(string path)
         {
             var curr = new DirectoryInfo(path);
 
@@ -94,10 +152,8 @@ namespace repo_version
                 commits = count;
             }
 
-
-            var response = new
+            var response = new RepoVersion
             {
-                SemVer = SemVer(major, minor, patch, preReleaseTag, commits),
                 Major = major,
                 Minor = minor,
                 Patch = patch,
@@ -120,16 +176,6 @@ namespace repo_version
             return v;
         }
 
-        private static string SemVer(int major, int minor, int patch, string preReleaseTag, int commits)
-        {
-            if (!string.IsNullOrEmpty(preReleaseTag))
-            {
-                return $"{major}.{minor}.{patch}.{commits}-{preReleaseTag}";
-            }
-
-            return $"{major}.{minor}.{patch}.{commits}";
-        }
-
         private static string CalculatePreReleaseTag(Repository r)
         {
             var preReleaseTag = "";
@@ -146,7 +192,5 @@ namespace repo_version
 
             return preReleaseTag;
         }
-
-
     }
 }
