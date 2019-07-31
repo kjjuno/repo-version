@@ -1,4 +1,4 @@
-#addin nuget:?package=Cake.Json
+#addin nuget:?package=Cake.Json&version=4.0.0
 #addin nuget:?package=Newtonsoft.Json&version=11.0.2
 
 var target = Argument("target", "Pack");
