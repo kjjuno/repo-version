@@ -1,3 +1,5 @@
+![Nuget](https://img.shields.io/nuget/v/repo-version?style=plastic)
+
 # repo-version
 Automatic versioning for git repositories based tags, and the number of commits since the last tag.
 
