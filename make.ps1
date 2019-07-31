@@ -1,10 +1,18 @@
 #!/usr/bin/env pwsh
 
+Param(
+    [switch] $ApplyTag
+)
+
 $repoVersion = (dotnet run | ConvertFrom-Json)
 
-$fullSemVer = $repoVersion.FullSemVer
+$semVer = $repoVersion.SemVer;
 
-Write-Host "FullSemVer: $fullSemVer"
-$env:VERSION = $repoVersion.FullSemVer
+if ($ApplyTag) {
+    git tag $semVer
+}
+
+Write-Host "SemVer: $semVer"
+$env:VERSION = $semVer
 
 dotnet pack -c Release

@@ -96,8 +96,6 @@ namespace repo_version
             var response = new
             {
                 SemVer = SemVer(major, minor, patch, preReleaseTag, count),
-                FullSemVer = FullSemVer(major, minor, patch, preReleaseTag, count),
-                NuGetVersion = NuGetVersion(major, minor, patch, preReleaseTag, count),
                 Major = major,
                 Minor = minor,
                 Patch = patch,
@@ -120,40 +118,14 @@ namespace repo_version
             return v;
         }
 
-        private static string FullSemVer(int major, int minor, int patch, string preReleaseTag, int commits)
-        {
-            if (!string.IsNullOrEmpty(preReleaseTag))
-            {
-                return $"{major}.{minor}.{patch}-{preReleaseTag}.{commits}";
-            }
-
-            if (commits > 0)
-            {
-                return $"{major}.{minor}.{patch}+{commits}";
-            }
-
-            return $"{major}.{minor}.{patch}";
-        }
-
         private static string SemVer(int major, int minor, int patch, string preReleaseTag, int commits)
         {
             if (!string.IsNullOrEmpty(preReleaseTag))
             {
-                return $"{major}.{minor}.{patch}-{preReleaseTag}.{commits}";
+                return $"{major}.{minor}.{patch}.{commits}-{preReleaseTag}";
             }
 
-            return $"{major}.{minor}.{patch}";
-        }
-
-        private static string NuGetVersion(int major, int minor, int patch, string preReleaseTag, int commits)
-        {
-            if (!string.IsNullOrEmpty(preReleaseTag))
-            {
-                preReleaseTag = preReleaseTag.Substring(0, Math.Min(16, preReleaseTag.Length)).ToLower();
-                return $"{major}.{minor}.{patch}-{preReleaseTag}{commits:D4}";
-            }
-
-            return $"{major}.{minor}.{patch}";
+            return $"{major}.{minor}.{patch}.{commits}";
         }
 
         private static string CalculatePreReleaseTag(Repository r)
