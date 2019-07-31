@@ -1,4 +1,4 @@
-![Nuget](https://img.shields.io/nuget/v/repo-version?style=plastic)
+[![Nuget](https://img.shields.io/nuget/v/repo-version?style=plastic)](https://www.nuget.org/packages/repo-version)
 
 # repo-version
 Automatic versioning for git repositories based tags, and the number of commits since the last tag.
