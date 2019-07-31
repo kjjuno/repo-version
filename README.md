@@ -56,18 +56,7 @@ This project aims to acheive the parts of GitVersion that I love, without all of
 As such, this project should be extremely light weight and opinionated. It will only support the
 git workflow that I use. Below are my initial thoughts for the first version.
 
-## Versioning Rules
-
-```
-major.minor.patch.commits-since-last-tag
-
-master: 0.1.0.0 branch: 0.1.1.1-branch-name-abbrev
-    where the final number is the number of commits since the last tag
-merge
-master: 0.1.1.2 (should tag at this point)
-```
-
-1.0.0 features and assumptions
+## 1.0.0 features and assumptions
 
 1. master is main branch
 2. all branches start from master, and are merged back to master.
