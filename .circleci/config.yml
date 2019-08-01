@@ -13,5 +13,5 @@ jobs:
     version: 2
     build:
       jobs:
-        - build
+        - build:
             context: repo-version-secrets
