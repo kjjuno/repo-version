@@ -30,6 +30,10 @@ Task("Pack")
                     ["VERSION"] = version
                 }
             });
+
+        var nugetKey = EnvironmentVariable("NUGET_API_KEY");
+
+        Information($"NUGET_API_KEY: {nugetKey}");
     });
 
 RunTarget(target);
