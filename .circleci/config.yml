@@ -10,3 +10,9 @@ jobs:
           context: repo-version-secrets
           command:
             ./build.sh
+  workflows:
+    version: 2
+    build:
+      jobs:
+        - build
+
