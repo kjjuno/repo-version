@@ -34,6 +34,11 @@ Task("Pack")
         var nugetKey = EnvironmentVariable("NUGET_API_KEY");
 
         Information($"NUGET_API_KEY: {nugetKey}");
+
+        if (!string.IsNullOrEmpty(nugetKey))
+        {
+            Information("I have the key!");
+        }
     });
 
 RunTarget(target);
