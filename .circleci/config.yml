@@ -12,7 +12,6 @@ jobs:
   workflows:
     version: 2
     build:
-      context: repo-version-secrets
       jobs:
         - build
-
+            context: repo-version-secrets
