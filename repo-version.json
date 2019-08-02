@@ -3,11 +3,11 @@
   "minor": 1,
   "branches": [
     {
-      "regex": "master",
+      "regex": "^master$",
       "tag": ""
     },
     {
-      "regex": "support[/-]",
+      "regex": "^support[/-].*$",
       "tag": ""
     },
     {

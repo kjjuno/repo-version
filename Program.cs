@@ -307,8 +307,10 @@ namespace repo_version
 
                 preReleaseTag = preReleaseTag
                     .Replace("{BranchName}", branch)
-                    .Replace('_', '-')
-                    .Substring(0, Math.Min(30, preReleaseTag.Length));
+                    .Replace('_', '-');
+                preReleaseTag = preReleaseTag
+                    .Substring(0, Math.Min(30, preReleaseTag.Length))
+                    .TrimEnd('-');
             }
 
             return preReleaseTag;
