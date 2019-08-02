@@ -12,9 +12,9 @@ namespace repo_version
 {
     class Configuration
     {
-       public int Major { get; set; } 
-       public int Minor { get; set; } 
-       public List<BranchConfig> Branches { get; set; }
+        public int Major { get; set; } 
+        public int Minor { get; set; } 
+        public List<BranchConfig> Branches { get; set; }
     }
 
     class BranchConfig
@@ -53,6 +53,13 @@ namespace repo_version
         {
             return SemVer;
         }
+        
+        private static int ParseInt(string input)
+        {
+            var val = !string.IsNullOrEmpty(input) ? input : "0";
+
+            return int.Parse(val);
+        }
 
         public static bool TryParse(string input, out RepoVersion version)
         {
@@ -65,10 +72,10 @@ namespace repo_version
             }
 
             version = new RepoVersion();
-            version.Major = int.Parse(match.Groups["major"].Value ?? "0");
-            version.Minor = int.Parse(match.Groups["minor"].Value ?? "0");
-            version.Patch = int.Parse(match.Groups["patch"].Value ?? "0");
-            version.Commits = int.Parse(match.Groups["commits"].Value ?? "0");
+            version.Major = ParseInt(match.Groups["major"].Value);
+            version.Minor = ParseInt(match.Groups["minor"].Value);
+            version.Patch = ParseInt(match.Groups["patch"].Value);
+            version.Commits = ParseInt(match.Groups["commits"].Value);
             version.PreReleaseTag = match.Groups["tag"].Value ?? "";
 
             return true;
@@ -134,6 +141,26 @@ namespace repo_version
         static void Main(string[] args)
         {
             var config = new Configuration();
+            config.Major = 0;
+            config.Major = 1;
+            config.Branches = new List<BranchConfig>
+            {
+                new BranchConfig
+                {
+                    Regex = "^master$",
+                    Tag = ""
+                },
+                new BranchConfig
+                {
+                    Regex = "^support[/-].*$",
+                    Tag = ""
+                },
+                new BranchConfig
+                {
+                    Regex = ".+",
+                    Tag = "{BranchName}"
+                },
+            };
             var configFile = "repo-version.json";
             if (File.Exists(configFile))
             {
@@ -186,6 +213,8 @@ namespace repo_version
 
             Repository repo = new Repository(curr.FullName);
 
+            var status = repo.RetrieveStatus();
+
             var queryTags = from t in repo.Tags
                 let commit = t.PeeledTarget
                 where commit != null
@@ -198,6 +227,7 @@ namespace repo_version
             var lookup = queryTags.ToLookup(x => x.Commit.Id, x => x.Tag);
 
             var count = 0;
+
             var lastTag = new RepoVersion
             {
                 Major = config.Major,
@@ -223,8 +253,13 @@ namespace repo_version
 
             var preReleaseTag = "";
 
+            if (count == 0 && status.IsDirty)
+            {
+                count++;
+            }
+
             // Use the pre-release tag specified by the tag on the current commit
-            if (count == 0)
+            if (count == 0 && !status.IsDirty)
             {
                 preReleaseTag = lastTag.PreReleaseTag;
             }
