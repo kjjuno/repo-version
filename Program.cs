@@ -126,6 +126,11 @@ namespace repo_version
             HelpText = "The output format. Should be one of [semver, json]")]
         public string Format { get; set; }
 
+        [Option('t', "tag",
+            Default = "",
+            HelpText = "Overrides the pre-release tag.")]
+        public string Tag { get; set; }
+
         [Value(0,
             MetaName = "path",
             Default = ".",
@@ -153,7 +158,7 @@ namespace repo_version
 
         private static void RunOptionsAndReturnExitCode(Options options, Configuration config)
         {
-            var response = CalculateVersion(options.Path, config);
+            var response = CalculateVersion(options.Path, config, options);
 
             if (string.Compare(options.Format, "json", StringComparison.OrdinalIgnoreCase) == 0)
             {
@@ -173,7 +178,7 @@ namespace repo_version
             Environment.ExitCode = 1;
         }
 
-        public static RepoVersion CalculateVersion(string path, Configuration config)
+        public static RepoVersion CalculateVersion(string path, Configuration config, Options options)
         {
             var curr = new DirectoryInfo(path);
 
@@ -202,7 +207,7 @@ namespace repo_version
             var lookup = queryTags.ToLookup(x => x.Commit.Id, x => x.Tag);
 
             var count = 0;
-            var version = new RepoVersion
+            var lastTag = new RepoVersion
             {
                 Major = config.Major,
                 Minor =  config.Minor,
@@ -215,16 +220,30 @@ namespace repo_version
 
                 if (!string.IsNullOrEmpty(tag) && RepoVersion.TryParse(tag, out var v))
                 {
-                    version = v;
+                    lastTag = v;
                     break;
                 }
                 count++;
             }
-            var major = version.Major;
-            var minor = version.Minor;
-            var patch = version.Patch;
-            var commits = version.Commits;
-            var preReleaseTag = CalculatePreReleaseTag(repo, config);
+            var major = lastTag.Major;
+            var minor = lastTag.Minor;
+            var patch = lastTag.Patch;
+            var commits = lastTag.Commits;
+
+            // default to using the pre-release tag from the last commit
+            var preReleaseTag = lastTag.PreReleaseTag;
+
+            // Only use the supplied pre-release tag if there isn't a pre-release tag on this commit
+            if (count > 0)
+            {
+                preReleaseTag = options.Tag;
+            }
+
+            // If there is still no pre-release tag try to calculate one
+            if (string.IsNullOrEmpty(preReleaseTag))
+            {
+                preReleaseTag = CalculatePreReleaseTag(repo, config);
+            }
 
             // If nothing bumped it from the initial version
             // set the version to 0.1.0
@@ -234,8 +253,13 @@ namespace repo_version
             }
             else if (count > 0)
             {
-                patch++;
-                commits = count;
+                commits += count;
+
+                // Only increase the patch if there is no pre-release tag
+                if (string.IsNullOrEmpty(preReleaseTag) && string.IsNullOrEmpty(lastTag.PreReleaseTag))
+                {
+                    patch++;
+                }
             }
 
             var response = new RepoVersion
@@ -244,7 +268,7 @@ namespace repo_version
                 Minor = Math.Max(minor, config.Minor),
                 Patch = patch,
                 Commits = commits,
-                PreReleaseTag = !string.IsNullOrEmpty(preReleaseTag) ? preReleaseTag : version.PreReleaseTag
+                PreReleaseTag = preReleaseTag
             };
 
             return response;
