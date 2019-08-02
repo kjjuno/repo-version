@@ -13,6 +13,13 @@ namespace repo_version
     {
         static void Main(string[] args)
         {
+            Parser.Default.ParseArguments<Options>(args)
+                .WithParsed<Options>(options => RunOptionsAndReturnExitCode(options))
+                .WithNotParsed<Options>((errors) => HandleParseErrors(errors));
+        }
+
+        private static Configuration LoadConfiguration(string path)
+        {
             var config = new Configuration();
             config.Major = 0;
             config.Major = 1;
@@ -34,22 +41,25 @@ namespace repo_version
                     Tag = "{BranchName}"
                 },
             };
-            var configFile = "repo-version.json";
+            var configFile = Path.Combine(path, "repo-version.json");
             if (File.Exists(configFile))
             {
                 var json = File.ReadAllText(configFile);
                 config = JsonConvert.DeserializeObject<Configuration>(json);
             }
 
-            Parser.Default.ParseArguments<Options>(args)
-                .WithParsed<Options>(options => RunOptionsAndReturnExitCode(options, config))
-                .WithNotParsed<Options>((errors) => HandleParseErrors(errors));
+            return config;
         }
 
-
-        private static void RunOptionsAndReturnExitCode(Options options, Configuration config)
+        private static void RunOptionsAndReturnExitCode(Options options)
         {
-            var response = CalculateVersion(options.Path, config, options);
+            var response = CalculateVersion(options.Path, options);
+
+            if (response == null)
+            {
+                Environment.ExitCode = 1;
+                return;
+            }
 
             if (string.Compare(options.Format, "json", StringComparison.OrdinalIgnoreCase) == 0)
             {
@@ -69,7 +79,7 @@ namespace repo_version
             Environment.ExitCode = 1;
         }
 
-        public static RepoVersion CalculateVersion(string path, Configuration config, Options options)
+        public static RepoVersion CalculateVersion(string path, Options options)
         {
             var curr = new DirectoryInfo(path);
 
@@ -83,6 +93,8 @@ namespace repo_version
                 Console.WriteLine("not a git repository");
                 return null;
             }
+
+            var config = LoadConfiguration(curr.FullName);
 
             Repository repo = new Repository(curr.FullName);
 
