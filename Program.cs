@@ -22,7 +22,7 @@ namespace repo_version
         {
             var config = new Configuration();
             config.Major = 0;
-            config.Major = 1;
+            config.Minor = 1;
             config.Branches = new List<BranchConfig>
             {
                 new BranchConfig
@@ -113,11 +113,7 @@ namespace repo_version
 
             var count = 0;
 
-            var lastTag = new RepoVersion
-            {
-                Major = config.Major,
-                Minor =  config.Minor,
-            };
+            RepoVersion lastTag = null;
 
             foreach (var commit in repo.Commits)
             {
@@ -131,13 +127,15 @@ namespace repo_version
                 }
                 count++;
             }
-            var major = lastTag.Major;
-            var minor = lastTag.Minor;
-            var patch = lastTag.Patch;
-            var commits = lastTag.Commits;
+            var major = lastTag?.Major ?? config.Major;
+            var minor = lastTag?.Minor ?? config.Minor;
+            var patch = lastTag?.Patch ?? 0;
+            var commits = lastTag?.Commits ?? 0;
 
             var preReleaseTag = "";
 
+            // If there are no useable tags or we are on a tagged commit, and there are uncommitted changes
+            // increment the count by 1
             if (count == 0 && status.IsDirty)
             {
                 count++;
@@ -165,7 +163,7 @@ namespace repo_version
                 commits += count;
 
                 // Only increase the patch if there is no pre-release tag on the last git tag
-                if (string.IsNullOrEmpty(lastTag.PreReleaseTag))
+                if (lastTag?.PreReleaseTag == "")
                 {
                     patch++;
                     commits = count;
