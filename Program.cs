@@ -1,141 +1,14 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
-using System.Linq;
+using System.Text.RegularExpressions;
+using CommandLine;
 using LibGit2Sharp;
 using Newtonsoft.Json;
-using Version = System.Version;
-using CommandLine;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
+using System.Linq;
 
 namespace repo_version
 {
-    class Configuration
-    {
-        public int Major { get; set; } 
-        public int Minor { get; set; } 
-        public List<BranchConfig> Branches { get; set; }
-    }
-
-    class BranchConfig
-    {
-        public string Regex { get; set; }
-        public string Tag { get; set; }
-    }
-
-    class RepoVersion : IComparable
-    {
-        private string _tag;
-
-        public string SemVer
-        {
-            get
-            {
-                if (!string.IsNullOrEmpty(PreReleaseTag))
-                {
-                    return $"{Major}.{Minor}.{Patch}.{Commits}-{PreReleaseTag}";
-                }
-
-                return $"{Major}.{Minor}.{Patch}.{Commits}";
-            }
-        }
-        public int Major { get; set; }
-        public int Minor { get; set; }
-        public int Patch { get; set; }
-        public int Commits { get; set; }
-        public string PreReleaseTag
-        {
-            get => _tag ?? string.Empty;
-            set => _tag = value;
-        }
-
-        public override string ToString()
-        {
-            return SemVer;
-        }
-        
-        private static int ParseInt(string input)
-        {
-            var val = !string.IsNullOrEmpty(input) ? input : "0";
-
-            return int.Parse(val);
-        }
-
-        public static bool TryParse(string input, out RepoVersion version)
-        {
-            version = null;
-            var match = Regex.Match(input, @"(?<major>\d+)(?:\.(?<minor>\d+)(?:\.(?<patch>\d+)(?:\.(?<commits>\d+))?)?)?(?:-(?<tag>.+))?");
-
-            if (!match.Success)
-            {
-                return false;
-            }
-
-            version = new RepoVersion();
-            version.Major = ParseInt(match.Groups["major"].Value);
-            version.Minor = ParseInt(match.Groups["minor"].Value);
-            version.Patch = ParseInt(match.Groups["patch"].Value);
-            version.Commits = ParseInt(match.Groups["commits"].Value);
-            version.PreReleaseTag = match.Groups["tag"].Value ?? "";
-
-            return true;
-        }
-
-        public int CompareTo(object obj)
-        {
-            var other = obj as RepoVersion;
-
-            if (other == null)
-            {
-                return 1;
-            }
-
-            int major = this.Major.CompareTo(other.Major);
-
-            if (major != 0)
-            {
-                return major;
-            }
-
-            int minor = this.Minor.CompareTo(other.Minor);
-
-            if (minor != 0)
-            {
-                return minor;
-            }
-
-            int patch = this.Patch.CompareTo(other.Patch);
-
-            if (patch != 0)
-            {
-                return patch;
-            }
-
-            int commits = this.Commits.CompareTo(other.Commits);
-
-            if (commits != 0)
-            {
-                return commits;
-            }
-
-            return this.PreReleaseTag.CompareTo(other.PreReleaseTag);
-        }
-    }
-
-    class Options
-    {
-        [Option('o', "output",
-            Default = "semver",
-            HelpText = "The output format. Should be one of [semver, json]")]
-        public string Format { get; set; }
-
-        [Value(0,
-            MetaName = "path",
-            Default = ".",
-            HelpText = "Path to a git repository.")]
-        public string Path { get; set; }
-    }
-
     class Program
     {
         static void Main(string[] args)
