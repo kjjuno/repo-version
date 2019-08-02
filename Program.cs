@@ -122,11 +122,6 @@ namespace repo_version
             HelpText = "The output format. Should be one of [semver, json]")]
         public string Format { get; set; }
 
-        [Option('t', "tag",
-            Default = "",
-            HelpText = "Overrides the pre-release tag.")]
-        public string Tag { get; set; }
-
         [Value(0,
             MetaName = "path",
             Default = ".",
@@ -226,17 +221,15 @@ namespace repo_version
             var patch = lastTag.Patch;
             var commits = lastTag.Commits;
 
-            // default to using the pre-release tag from the last commit
-            var preReleaseTag = lastTag.PreReleaseTag;
+            var preReleaseTag = "";
 
-            // Only use the supplied pre-release tag if there isn't a pre-release tag on this commit
-            if (count > 0)
+            // Use the pre-release tag specified by the tag on the current commit
+            if (count == 0)
             {
-                preReleaseTag = options.Tag;
+                preReleaseTag = lastTag.PreReleaseTag;
             }
-
-            // If there is still no pre-release tag try to calculate one
-            if (string.IsNullOrEmpty(preReleaseTag))
+            // if no tag exists at the current commit, calculate the pre-release tag
+            else
             {
                 preReleaseTag = CalculatePreReleaseTag(repo, config);
             }
@@ -251,10 +244,11 @@ namespace repo_version
             {
                 commits += count;
 
-                // Only increase the patch if there is no pre-release tag
-                if (string.IsNullOrEmpty(preReleaseTag) && string.IsNullOrEmpty(lastTag.PreReleaseTag))
+                // Only increase the patch if there is no pre-release tag on the last git tag
+                if (string.IsNullOrEmpty(lastTag.PreReleaseTag))
                 {
                     patch++;
+                    commits = count;
                 }
             }
 
@@ -284,20 +278,37 @@ namespace repo_version
 
         private static string CalculatePreReleaseTag(Repository repo, Configuration config)
         {
+            bool found = false;
             var preReleaseTag = "";
             var branch = repo.Head.FriendlyName;
-            if (branch != "master")
+
+            foreach (var branchConfig in config.Branches)
+            {
+                if (Regex.IsMatch(branch, branchConfig.Regex))
+                {
+                    preReleaseTag = branchConfig.Tag;
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found)
+            {
+                preReleaseTag = "{BranchName}";
+            }
+
+            if (preReleaseTag.Contains("{BranchName}"))
             {
                 var idx = branch.LastIndexOf('/');
                 if (idx >= 0)
                 {
-                    preReleaseTag = branch.Substring(idx + 1);
+                    branch = branch.Substring(idx + 1);
                 }
-                else
-                {
-                    preReleaseTag = branch;
-                }
-                preReleaseTag = preReleaseTag.Replace('_', '-').Substring(0, Math.Min(30, preReleaseTag.Length));
+
+                preReleaseTag = preReleaseTag
+                    .Replace("{BranchName}", branch)
+                    .Replace('_', '-')
+                    .Substring(0, Math.Min(30, preReleaseTag.Length));
             }
 
             return preReleaseTag;
