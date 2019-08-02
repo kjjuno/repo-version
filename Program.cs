@@ -56,11 +56,14 @@ namespace repo_version
 
         public static bool TryParse(string input, out RepoVersion version)
         {
+            Console.Write("TryParse: {0} => ", input);
+
             version = null;
-            var match = Regex.Match("4.8.5.45-alpha.3", @"(?<major>\d+)(?:\.(?<minor>\d+)(?:\.(?<patch>\d+)(?:\.(?<commits>\d+))?)?)?(?:-(?<tag>.+))?");
+            var match = Regex.Match(input, @"(?<major>\d+)(?:\.(?<minor>\d+)(?:\.(?<patch>\d+)(?:\.(?<commits>\d+))?)?)?(?:-(?<tag>.+))?");
 
             if (!match.Success)
             {
+                Console.WriteLine("false");
                 return false;
             }
 
@@ -71,6 +74,7 @@ namespace repo_version
             version.Commits = int.Parse(match.Groups["commits"].Value ?? "0");
             version.PreReleaseTag = match.Groups["tag"].Value ?? "";
 
+            Console.WriteLine("true ({0}", version.ToString());
             return true;
         }
 
@@ -186,18 +190,6 @@ namespace repo_version
 
             Repository repo = new Repository(curr.FullName);
 
-            var query = from t in repo.Tags
-                let v = ParseVersion(t.FriendlyName)
-                where v != null
-                orderby v descending
-                select new
-                {
-                    Tag = t,
-                    Version = v
-                };
-
-            var latest = query.FirstOrDefault();
-
             var queryTags = from t in repo.Tags
                 let commit = t.PeeledTarget
                 where commit != null
@@ -210,13 +202,18 @@ namespace repo_version
             var lookup = queryTags.ToLookup(x => x.Commit.Id, x => x.Tag);
 
             var count = 0;
-            var version = new Version(config.Major, config.Minor);
+            var version = new RepoVersion
+            {
+                Major = config.Major,
+                Minor =  config.Minor,
+            };
+
             foreach (var commit in repo.Commits)
             {
                 var t = lookup[commit.Id];
                 var tag = t.FirstOrDefault()?.FriendlyName.TrimStart('v', 'V');
 
-                if (!string.IsNullOrEmpty(tag) && Version.TryParse(tag, out var v))
+                if (!string.IsNullOrEmpty(tag) && RepoVersion.TryParse(tag, out var v))
                 {
                     version = v;
                     break;
@@ -225,8 +222,8 @@ namespace repo_version
             }
             var major = version.Major;
             var minor = version.Minor;
-            var patch = version.Build;
-            var commits = version.Revision;
+            var patch = version.Patch;
+            var commits = version.Commits;
             var preReleaseTag = CalculatePreReleaseTag(repo, config);
 
             // If nothing bumped it from the initial version
@@ -247,7 +244,7 @@ namespace repo_version
                 Minor = Math.Max(minor, config.Minor),
                 Patch = patch,
                 Commits = commits,
-                PreReleaseTag = preReleaseTag
+                PreReleaseTag = !string.IsNullOrEmpty(preReleaseTag) ? preReleaseTag : version.PreReleaseTag
             };
 
             return response;
