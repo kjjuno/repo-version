@@ -56,14 +56,11 @@ namespace repo_version
 
         public static bool TryParse(string input, out RepoVersion version)
         {
-            Console.Write("TryParse: {0} => ", input);
-
             version = null;
             var match = Regex.Match(input, @"(?<major>\d+)(?:\.(?<minor>\d+)(?:\.(?<patch>\d+)(?:\.(?<commits>\d+))?)?)?(?:-(?<tag>.+))?");
 
             if (!match.Success)
             {
-                Console.WriteLine("false");
                 return false;
             }
 
@@ -74,7 +71,6 @@ namespace repo_version
             version.Commits = int.Parse(match.Groups["commits"].Value ?? "0");
             version.PreReleaseTag = match.Groups["tag"].Value ?? "";
 
-            Console.WriteLine("true ({0}", version.ToString());
             return true;
         }
 
