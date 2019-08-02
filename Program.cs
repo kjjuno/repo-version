@@ -136,7 +136,7 @@ namespace repo_version
 
             // If there are no useable tags or we are on a tagged commit, and there are uncommitted changes
             // increment the count by 1
-            if (count == 0 && status.IsDirty)
+            if (status.IsDirty)
             {
                 count++;
             }
