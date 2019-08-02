@@ -1,4 +1,3 @@
-#addin nuget:?package=Cake.Git&version=0.21.0
 #addin nuget:?package=Cake.Json&version=4.0.0
 #addin nuget:?package=Newtonsoft.Json&version=11.0.2
 
@@ -44,9 +43,19 @@ Task("Publish")
     .IsDependentOn("Pack")
     .Does(() =>
     {
-        var branch = GitBranchCurrent(".");
+        IEnumerable<string> redirectedStandardOutput;
+        var exitCodeWithArgument = StartProcess("git", new ProcessSettings 
+            {
+                Arguments = "rev-parse --abbrev-ref HEAD",
+                RedirectStandardOutput = true
+            },
+            out redirectedStandardOutput);
 
-        if (branch.FriendlyName != "master")
+        var branch = redirectedStandardOutput.FirstOrDefault();
+
+        Information($"Current Branch: {branch}");
+
+        if (branch != "master")
         {
             Information("Not on master branch, no package will be pushed");
             return;
