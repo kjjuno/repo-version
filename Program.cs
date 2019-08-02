@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using LibGit2Sharp;
@@ -6,11 +6,27 @@ using Newtonsoft.Json;
 using Version = System.Version;
 using CommandLine;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace repo_version
 {
-    class RepoVersion
+    class Configuration
     {
+       public int Major { get; set; } 
+       public int Minor { get; set; } 
+       public List<BranchConfig> Branches { get; set; }
+    }
+
+    class BranchConfig
+    {
+        public string Regex { get; set; }
+        public string Tag { get; set; }
+    }
+
+    class RepoVersion : IComparable
+    {
+        private string _tag;
+
         public string SemVer
         {
             get
@@ -27,11 +43,75 @@ namespace repo_version
         public int Minor { get; set; }
         public int Patch { get; set; }
         public int Commits { get; set; }
-        public string PreReleaseTag { get; set; }
+        public string PreReleaseTag
+        {
+            get => _tag ?? string.Empty;
+            set => _tag = value;
+        }
 
         public override string ToString()
         {
             return SemVer;
+        }
+
+        public static bool TryParse(string input, out RepoVersion version)
+        {
+            version = null;
+            var match = Regex.Match("4.8.5.45-alpha.3", @"(?<major>\d+)(?:\.(?<minor>\d+)(?:\.(?<patch>\d+)(?:\.(?<commits>\d+))?)?)?(?:-(?<tag>.+))?");
+
+            if (!match.Success)
+            {
+                return false;
+            }
+
+            version = new RepoVersion();
+            version.Major = int.Parse(match.Groups["major"].Value ?? "0");
+            version.Minor = int.Parse(match.Groups["minor"].Value ?? "0");
+            version.Patch = int.Parse(match.Groups["patch"].Value ?? "0");
+            version.Commits = int.Parse(match.Groups["commits"].Value ?? "0");
+            version.PreReleaseTag = match.Groups["tag"].Value ?? "";
+
+            return true;
+        }
+
+        public int CompareTo(object obj)
+        {
+            var other = obj as RepoVersion;
+
+            if (other == null)
+            {
+                return 1;
+            }
+
+            int major = this.Major.CompareTo(other.Major);
+
+            if (major != 0)
+            {
+                return major;
+            }
+
+            int minor = this.Minor.CompareTo(other.Minor);
+
+            if (minor != 0)
+            {
+                return minor;
+            }
+
+            int patch = this.Patch.CompareTo(other.Patch);
+
+            if (patch != 0)
+            {
+                return patch;
+            }
+
+            int commits = this.Commits.CompareTo(other.Commits);
+
+            if (commits != 0)
+            {
+                return commits;
+            }
+
+            return this.PreReleaseTag.CompareTo(other.PreReleaseTag);
         }
     }
 
@@ -53,14 +133,23 @@ namespace repo_version
     {
         static void Main(string[] args)
         {
+            var config = new Configuration();
+            var configFile = "repo-version.json";
+            if (File.Exists(configFile))
+            {
+                var json = File.ReadAllText(configFile);
+                config = JsonConvert.DeserializeObject<Configuration>(json);
+            }
+
             Parser.Default.ParseArguments<Options>(args)
-                .WithParsed<Options>(options => RunOptionsAndReturnExitCode(options))
+                .WithParsed<Options>(options => RunOptionsAndReturnExitCode(options, config))
                 .WithNotParsed<Options>((errors) => HandleParseErrors(errors));
         }
 
-        private static void RunOptionsAndReturnExitCode(Options options)
+
+        private static void RunOptionsAndReturnExitCode(Options options, Configuration config)
         {
-            var response = CalculateVersion(options.Path);
+            var response = CalculateVersion(options.Path, config);
 
             if (string.Compare(options.Format, "json", StringComparison.OrdinalIgnoreCase) == 0)
             {
@@ -80,7 +169,7 @@ namespace repo_version
             Environment.ExitCode = 1;
         }
 
-        public static RepoVersion CalculateVersion(string path)
+        public static RepoVersion CalculateVersion(string path, Configuration config)
         {
             var curr = new DirectoryInfo(path);
 
@@ -95,9 +184,9 @@ namespace repo_version
                 return null;
             }
 
-            Repository r = new Repository(curr.FullName);
+            Repository repo = new Repository(curr.FullName);
 
-            var query = from t in r.Tags
+            var query = from t in repo.Tags
                 let v = ParseVersion(t.FriendlyName)
                 where v != null
                 orderby v descending
@@ -109,7 +198,7 @@ namespace repo_version
 
             var latest = query.FirstOrDefault();
 
-            var q = from t in r.Tags
+            var queryTags = from t in repo.Tags
                 let commit = t.PeeledTarget
                 where commit != null
                 select new
@@ -118,11 +207,11 @@ namespace repo_version
                     Tag = t
                 };
 
-            var lookup = q.ToLookup(x => x.Commit.Id, x => x.Tag);
+            var lookup = queryTags.ToLookup(x => x.Commit.Id, x => x.Tag);
 
             var count = 0;
-            var version = new Version("0.0.0");
-            foreach (var commit in r.Commits)
+            var version = new Version(config.Major, config.Minor);
+            foreach (var commit in repo.Commits)
             {
                 var t = lookup[commit.Id];
                 var tag = t.FirstOrDefault()?.FriendlyName.TrimStart('v', 'V');
@@ -138,7 +227,7 @@ namespace repo_version
             var minor = version.Minor;
             var patch = version.Build;
             var commits = version.Revision;
-            var preReleaseTag = CalculatePreReleaseTag(r);
+            var preReleaseTag = CalculatePreReleaseTag(repo, config);
 
             // If nothing bumped it from the initial version
             // set the version to 0.1.0
@@ -154,8 +243,8 @@ namespace repo_version
 
             var response = new RepoVersion
             {
-                Major = major,
-                Minor = minor,
+                Major = Math.Max(major, config.Major),
+                Minor = Math.Max(minor, config.Minor),
                 Patch = patch,
                 Commits = commits,
                 PreReleaseTag = preReleaseTag
@@ -164,11 +253,11 @@ namespace repo_version
             return response;
         }
 
-        static Version ParseVersion(string input)
+        static RepoVersion ParseVersion(string input)
         {
             var str = input.TrimStart('v', 'V');
 
-            if (!Version.TryParse(str, out var v))
+            if (!RepoVersion.TryParse(str, out var v))
             {
                 return null;
             }
@@ -176,10 +265,10 @@ namespace repo_version
             return v;
         }
 
-        private static string CalculatePreReleaseTag(Repository r)
+        private static string CalculatePreReleaseTag(Repository repo, Configuration config)
         {
             var preReleaseTag = "";
-            var branch = r.Head.FriendlyName;
+            var branch = repo.Head.FriendlyName;
             if (branch != "master")
             {
                 var idx = branch.LastIndexOf('/');
