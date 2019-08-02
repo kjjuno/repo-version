@@ -1,0 +1,18 @@
+{
+  "major": 0,
+  "minor": 1,
+  "branches": [
+    {
+      "regex": "^master$",
+      "tag": "alpha"
+    },
+    {
+      "regex": "^support[/-].*$",
+      "tag": ""
+    },
+    {
+      "regex": ".+",
+      "tag": "pr-{BranchName}"
+    }
+  ]
+}

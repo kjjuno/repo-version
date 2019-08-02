@@ -1,0 +1,11 @@
+[*]
+charset = utf-8
+
+[*.{cs,cake,sln,md}]
+indent_style = space
+indent_size = 4
+
+[*.{csproj,config,xml,json,yaml,yml}]
+indent_style = space
+indent_size = 2
+
