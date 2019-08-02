@@ -63,8 +63,6 @@ Task("Publish")
 
         var apiKey = EnvironmentVariable("NUGET_API_KEY");
 
-        Information($"NUGET_API_KEY: {apiKey}");
-
         if (string.IsNullOrEmpty(apiKey))
         {
             throw new Exception("No value for NUGET_API_KEY");
@@ -72,6 +70,7 @@ Task("Publish")
 
          var settings = new DotNetCoreNuGetPushSettings
          {
+             Source = "https://www.nuget.org/api/v2/package",
              ApiKey = apiKey
          };
 
