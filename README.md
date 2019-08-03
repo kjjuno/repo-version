@@ -54,6 +54,37 @@ git push --tags
 
 The next commit will be be automatically bumped to `1.2.4.1`
 
+## repo-version.json
+This file should be created at the root of your repository. This will
+control the major and minor versions, as well as provide pre-release tags based
+on branch names.
+
+repo-version.json
+```json
+{
+  "major": 0,
+  "minor": 1,
+  "branches": [
+    {
+      "regex": "^master$",
+      "tag": "alpha"
+    },
+    {
+      "regex": "^support[/-].*$",
+      "tag": ""
+    },
+    {
+      "regex": ".+",
+      "tag": "pr-{BranchName}"
+    }
+  ]
+}
+```
+
+The `branches` section is an ordered list of branch configs. When trying to calculate the pre-release tag `repo-version` will do a Regex match against each branch config, and use the first one that it finds.
+
+In the given case the `master` branch is currently in an alpha state, but the support branches are full releases. Everything else will get a name based on the branch name.
+
 ## Why not just use GitVersion?
 
 For years now I have used GitVersion, but I have a few gripes with it. First, I almost always
