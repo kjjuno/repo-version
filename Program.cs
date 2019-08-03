@@ -189,6 +189,18 @@ namespace repo_version
                 }
             }
 
+            if (config.Major > major)
+            {
+                major = config.Major;
+                minor = config.Minor;
+                patch = 0;
+            }
+            else if (config.Minor > minor)
+            {
+                minor = config.Minor;
+                patch = 0;
+            }
+
             var response = new RepoVersion
             {
                 Major = Math.Max(major, config.Major),
