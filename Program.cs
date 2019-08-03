@@ -231,13 +231,16 @@ namespace repo_version
             var preReleaseTag = "";
             var branch = repo.Head.FriendlyName;
 
-            foreach (var branchConfig in config.Branches)
+            if (config?.Branches != null)
             {
-                if (Regex.IsMatch(branch, branchConfig.Regex))
+                foreach (var branchConfig in config.Branches)
                 {
-                    preReleaseTag = branchConfig.Tag;
-                    found = true;
-                    break;
+                    if (Regex.IsMatch(branch, branchConfig.Regex))
+                    {
+                        preReleaseTag = branchConfig.Tag;
+                        found = true;
+                        break;
+                    }
                 }
             }
 
@@ -255,12 +258,19 @@ namespace repo_version
                 }
 
                 preReleaseTag = preReleaseTag
-                    .Replace("{BranchName}", branch)
-                    .Replace('_', '-');
-                preReleaseTag = preReleaseTag
-                    .Substring(0, Math.Min(30, preReleaseTag.Length))
-                    .TrimEnd('-');
+                    .Replace("{BranchName}", branch);
             }
+
+            preReleaseTag = preReleaseTag
+                .Replace("(no branch)", "detached-head")
+                .Replace('_', '-')
+                .Replace("(", "")
+                .Replace(")", "")
+                .Replace(" ", "-");
+
+            preReleaseTag = preReleaseTag
+                .Substring(0, Math.Min(30, preReleaseTag.Length))
+                .TrimEnd('-');
 
             return preReleaseTag;
         }
