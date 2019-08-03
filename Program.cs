@@ -21,9 +21,10 @@ namespace repo_version
         private static Configuration LoadConfiguration(string path)
         {
             var config = new Configuration();
-            config.Major = 0;
-            config.Minor = 1;
-            config.Branches = new List<BranchConfig>
+            var defaultConfig = new Configuration();
+            defaultConfig.Major = 0;
+            defaultConfig.Minor = 1;
+            defaultConfig.Branches = new List<BranchConfig>
             {
                 new BranchConfig
                 {
@@ -44,8 +45,21 @@ namespace repo_version
             var configFile = Path.Combine(path, "repo-version.json");
             if (File.Exists(configFile))
             {
-                var json = File.ReadAllText(configFile);
-                config = JsonConvert.DeserializeObject<Configuration>(json);
+                try
+                {
+                    var json = File.ReadAllText(configFile);
+                    config = JsonConvert.DeserializeObject<Configuration>(json);
+
+                    if (config.Branches == null)
+                    {
+                        config.Branches = defaultConfig.Branches;
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("Unable to load repo-version.json. {0}", e.Message);
+                    return null;
+                }
             }
 
             return config;
@@ -95,6 +109,11 @@ namespace repo_version
             }
 
             var config = LoadConfiguration(curr.FullName);
+
+            if (config == null)
+            {
+                return null;
+            }
 
             Repository repo = new Repository(curr.FullName);
 
