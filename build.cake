@@ -77,4 +77,19 @@ Task("Publish")
          DotNetCoreNuGetPush($"nupkg/repo-version.{version}.nupkg", settings);
     });
 
+Task("Install")
+    .IsDependentOn("Pack")
+    .Does(() =>
+    {
+        StartProcess("dotnet", new ProcessSettings
+        {
+            Arguments = "tool uninstall -g repo-version"
+        });
+
+        StartProcess("dotnet", new ProcessSettings
+        {
+            Arguments = $"tool install -g --add-source ./nupkg repo-version --version {version}"
+        });
+    });
+
 RunTarget(target);
