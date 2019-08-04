@@ -118,9 +118,10 @@ namespace repo_version
             var commits = lastTag?.Commits ?? 0;
 
             var preReleaseTag = "";
+            var status = repo.RetrieveStatus();
 
             // Use the pre-release tag specified by the tag on the current commit
-            if (lastTag != null && commitsSinceTag == 0)
+            if (lastTag != null && commitsSinceTag == 0 && !status.IsDirty)
             {
                 preReleaseTag = lastTag.PreReleaseTag;
             }
@@ -160,7 +161,6 @@ namespace repo_version
                 patch = 0;
             }
 
-            var status = repo.RetrieveStatus();
             var response = new RepoVersion
             {
                 Major = Math.Max(major, config.Major),
