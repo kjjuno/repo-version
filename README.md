@@ -12,7 +12,7 @@ dotnet tool install -g repo-version
 
 ## Update
 ```
-dotnet tool upgrade -g repo-version
+dotnet tool update -g repo-version
 ```
 
 ## Usage
