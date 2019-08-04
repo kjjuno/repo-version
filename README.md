@@ -1,5 +1,5 @@
 [![Nuget](https://img.shields.io/nuget/v/repo-version?style=plastic)](https://www.nuget.org/packages/repo-version)
-![Nuget](https://img.shields.io/nuget/dt/repo-version?style=plastic)
+[![Nuget](https://img.shields.io/nuget/dt/repo-version?style=plastic)](https://www.nuget.org/packages/repo-version)
 
 # repo-version
 Automatic versioning for git repositories based tags, and the number of commits since the last tag.
@@ -8,6 +8,11 @@ Automatic versioning for git repositories based tags, and the number of commits 
 
 ```
 dotnet tool install -g repo-version
+```
+
+## Update
+```
+dotnet tool upgrade -g repo-version
 ```
 
 ## Usage
