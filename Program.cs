@@ -18,52 +18,6 @@ namespace repo_version
                 .WithNotParsed<Options>((errors) => HandleParseErrors(errors));
         }
 
-        private static Configuration LoadConfiguration(string path)
-        {
-            var config = new Configuration();
-            var defaultConfig = new Configuration();
-            defaultConfig.Major = 0;
-            defaultConfig.Minor = 1;
-            defaultConfig.Branches = new List<BranchConfig>
-            {
-                new BranchConfig
-                {
-                    Regex = "^master$",
-                    Tag = ""
-                },
-                new BranchConfig
-                {
-                    Regex = "^support[/-].*$",
-                    Tag = ""
-                },
-                new BranchConfig
-                {
-                    Regex = ".+",
-                    Tag = "{BranchName}"
-                },
-            };
-            var configFile = Path.Combine(path, "repo-version.json");
-            if (File.Exists(configFile))
-            {
-                try
-                {
-                    var json = File.ReadAllText(configFile);
-                    config = JsonConvert.DeserializeObject<Configuration>(json);
-
-                    if (config.Branches == null)
-                    {
-                        config.Branches = defaultConfig.Branches;
-                    }
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("Unable to load repo-version.json. {0}", e.Message);
-                    return null;
-                }
-            }
-
-            return config;
-        }
 
         private static void RunOptionsAndReturnExitCode(Options options)
         {
@@ -93,7 +47,7 @@ namespace repo_version
             Environment.ExitCode = 1;
         }
 
-        public static RepoVersion CalculateVersion(string path, Options options)
+        private static string FindGitFolder(string path)
         {
             var curr = new DirectoryInfo(path);
 
@@ -102,23 +56,11 @@ namespace repo_version
                 curr = curr.Parent;
             }
 
-            if (curr == null)
-            {
-                Console.WriteLine("not a git repository");
-                return null;
-            }
+            return curr?.FullName;
+        }
 
-            var config = LoadConfiguration(curr.FullName);
-
-            if (config == null)
-            {
-                return null;
-            }
-
-            Repository repo = new Repository(curr.FullName);
-
-            var status = repo.RetrieveStatus();
-
+        private static RepoVersion GetLastTaggedVersion(Repository repo, out int commitsSinceTag)
+        {
             var queryTags = from t in repo.Tags
                 let commit = t.PeeledTarget
                 where commit != null
@@ -130,7 +72,7 @@ namespace repo_version
 
             var lookup = queryTags.ToLookup(x => x.Commit.Id, x => x.Tag);
 
-            var count = 0;
+            commitsSinceTag = 0;
 
             RepoVersion lastTag = null;
 
@@ -144,8 +86,32 @@ namespace repo_version
                     lastTag = v;
                     break;
                 }
-                count++;
+                commitsSinceTag++;
             }
+
+            return lastTag;
+        }
+
+        public static RepoVersion CalculateVersion(string path, Options options)
+        {
+            var gitFolder = FindGitFolder(path);
+
+            if (gitFolder == null)
+            {
+                Console.WriteLine("not a git repository");
+                return null;
+            }
+
+            var config = Configuration.Load(gitFolder);
+
+            if (config == null)
+            {
+                return null;
+            }
+
+            var repo = new Repository(gitFolder);
+            var lastTag = GetLastTaggedVersion(repo, out var commitsSinceTag);
+
             var major = lastTag?.Major ?? config.Major;
             var minor = lastTag?.Minor ?? config.Minor;
             var patch = lastTag?.Patch ?? 0;
@@ -153,15 +119,8 @@ namespace repo_version
 
             var preReleaseTag = "";
 
-            // If there are no useable tags or we are on a tagged commit, and there are uncommitted changes
-            // increment the count by 1
-            if (status.IsDirty)
-            {
-                count++;
-            }
-
             // Use the pre-release tag specified by the tag on the current commit
-            if (count == 0 && !status.IsDirty)
+            if (lastTag != null && commitsSinceTag == 0)
             {
                 preReleaseTag = lastTag.PreReleaseTag;
             }
@@ -177,15 +136,15 @@ namespace repo_version
             {
                 minor = 1;
             }
-            else if (count > 0)
+            else if (commitsSinceTag > 0)
             {
-                commits += count;
+                commits += commitsSinceTag;
 
                 // Only increase the patch if there is no pre-release tag on the last git tag
                 if (lastTag?.PreReleaseTag == "")
                 {
                     patch++;
-                    commits = count;
+                    commits = commitsSinceTag;
                 }
             }
 
@@ -201,13 +160,15 @@ namespace repo_version
                 patch = 0;
             }
 
+            var status = repo.RetrieveStatus();
             var response = new RepoVersion
             {
                 Major = Math.Max(major, config.Major),
                 Minor = Math.Max(minor, config.Minor),
                 Patch = patch,
                 Commits = commits,
-                PreReleaseTag = preReleaseTag
+                PreReleaseTag = preReleaseTag,
+                IsDirty = status.IsDirty
             };
 
             return response;

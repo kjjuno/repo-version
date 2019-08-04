@@ -13,16 +13,17 @@ namespace repo_version
             {
                 if (!string.IsNullOrEmpty(PreReleaseTag))
                 {
-                    return $"{Major}.{Minor}.{Patch}.{Commits}-{PreReleaseTag}";
+                    return $"{Major}.{Minor}.{Patch}.{Commits}-{PreReleaseTag}{DirtyString()}";
                 }
 
-                return $"{Major}.{Minor}.{Patch}.{Commits}";
+                return $"{Major}.{Minor}.{Patch}.{Commits}{DirtyString()}";
             }
         }
         public int Major { get; set; }
         public int Minor { get; set; }
         public int Patch { get; set; }
         public int Commits { get; set; }
+        public bool IsDirty { get; set; }
         public string PreReleaseTag
         {
             get => _tag ?? string.Empty;
@@ -32,6 +33,13 @@ namespace repo_version
         public override string ToString()
         {
             return SemVer;
+        }
+
+        private string DirtyString()
+        {
+            return IsDirty
+                ? "+1"
+                : "";
         }
         
         private static int ParseInt(string input)
