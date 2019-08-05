@@ -16,9 +16,9 @@ namespace repo_version
         [JsonProperty("branches", Order = 2)]
         public List<BranchConfig> Branches { get; set; }
 
-        public static Configuration Load(string path)
+        public static Configuration Load(string path, bool useDefaults)
         {
-            var config = new Configuration();
+            Configuration config = null;
             var defaultConfig = new Configuration();
             defaultConfig.Major = 0;
             defaultConfig.Minor = 1;
@@ -59,7 +59,7 @@ namespace repo_version
                     return null;
                 }
             }
-            else
+            else if (useDefaults)
             {
                 config = defaultConfig;
             }

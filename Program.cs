@@ -36,7 +36,7 @@ namespace repo_version
             }
         }
 
-        private static void ModifyConfig(string path, Action<Configuration> transform, Action<Configuration, string> success)
+        private static void ModifyConfig(string path, bool create, Action<Configuration> transform, Action<Configuration, string> success)
         {
             var gitFolder = FindGitFolder(path);
 
@@ -46,10 +46,11 @@ namespace repo_version
                 return;
             }
 
-            var config = Configuration.Load(gitFolder);
+            var config = Configuration.Load(gitFolder, create);
 
             if (config == null)
             {
+                Console.WriteLine("No repo-version.json file. Please run repo-version init");
                 return;
             }
 
@@ -65,6 +66,7 @@ namespace repo_version
         private static void Init(InitOptions options)
         {
             ModifyConfig(options.Path,
+                create: true,
                 transform: config =>
                 {
                     Console.WriteLine("Please enter the major and minor versions for this repository");
@@ -93,6 +95,7 @@ namespace repo_version
         private static void BumpMajorVersion(BumpMajorVersionOptions options)
         {
             ModifyConfig(options.Path,
+                create: false,
                 transform: config =>
                 {
                     config.Major++;
@@ -107,6 +110,7 @@ namespace repo_version
         private static void BumpMinorVersion(BumpMinorVersionOptions options)
         {
             ModifyConfig(options.Path,
+                create: false,
                 transform: config =>
                 {
                     config.Minor++;
@@ -200,7 +204,7 @@ namespace repo_version
                 return null;
             }
 
-            var config = Configuration.Load(gitFolder);
+            var config = Configuration.Load(gitFolder, true);
 
             if (config == null)
             {
