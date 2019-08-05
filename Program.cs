@@ -103,7 +103,7 @@ namespace repo_version
                 },
                 success: (config, path) =>
                 {
-                    Console.WriteLine("Version bumpted to {0}.{1}", config.Major, config.Minor);
+                    Console.WriteLine("Version bumped to {0}.{1}", config.Major, config.Minor);
                 });
         }
 
