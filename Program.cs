@@ -18,7 +18,7 @@ namespace repo_version
                 o.HelpWriter = null;
             });
 
-            var result = parser.ParseArguments<Options, InitOptions>(args);
+            var result = parser.ParseArguments<Options, InitOptions, BumpMajorVersionOptions, BumpMinorVersionOptions>(args);
 
             if ((result is NotParsed<object>) && ((NotParsed<object>)result).Errors.Any(o => o.Tag == ErrorType.NoVerbSelectedError || o.Tag == ErrorType.BadVerbSelectedError))
             {
@@ -28,15 +28,17 @@ namespace repo_version
             }
             else
             {
-                Parser.Default.ParseArguments<Options, InitOptions>(args)
+                Parser.Default.ParseArguments<Options, InitOptions, BumpMajorVersionOptions, BumpMinorVersionOptions>(args)
                     .WithParsed<InitOptions>(options => Init(options))
+                    .WithParsed<BumpMajorVersionOptions>(options => BumpMajorVersion(options))
+                    .WithParsed<BumpMinorVersionOptions>(options => BumpMinorVersion(options))
                     .WithNotParsed((errors) => HandleParseErrors(errors));
             }
         }
 
-        private static void Init(InitOptions options)
+        private static void ModifyConfig(string path, Action<Configuration> transform, Action<Configuration, string> success)
         {
-            var gitFolder = FindGitFolder(options.Path);
+            var gitFolder = FindGitFolder(path);
 
             if (gitFolder == null)
             {
@@ -51,28 +53,68 @@ namespace repo_version
                 return;
             }
 
-            Console.WriteLine("Please enter the major and minor versions for this repository");
-            Console.Write("Major: ({0}) ", config.Major);
-            var input = Console.ReadLine();
-
-            if (!string.IsNullOrEmpty(input) && int.TryParse(input, out var major))
-            {
-                config.Major = major;
-            }
-
-            Console.Write("Minor: ({0}) ", config.Minor);
-            input = Console.ReadLine();
-
-            if (!string.IsNullOrEmpty(input) && int.TryParse(input, out var minor))
-            {
-                config.Minor = minor;
-            }
+            transform(config);
 
             var json = JsonConvert.SerializeObject(config, Formatting.Indented);
-            var path = Path.Combine(gitFolder, "repo-version.json");
+            path = Path.Combine(gitFolder, "repo-version.json");
             File.WriteAllText(path, json);
 
-            Console.WriteLine("created {0}", path);
+            success(config, path);
+        }
+
+        private static void Init(InitOptions options)
+        {
+            ModifyConfig(options.Path,
+                transform: config =>
+                {
+                    Console.WriteLine("Please enter the major and minor versions for this repository");
+                    Console.Write("Major: ({0}) ", config.Major);
+                    var input = Console.ReadLine();
+
+                    if (!string.IsNullOrEmpty(input) && int.TryParse(input, out var major))
+                    {
+                        config.Major = major;
+                    }
+
+                    Console.Write("Minor: ({0}) ", config.Minor);
+                    input = Console.ReadLine();
+
+                    if (!string.IsNullOrEmpty(input) && int.TryParse(input, out var minor))
+                    {
+                        config.Minor = minor;
+                    }
+                },
+                success: (config, path) =>
+                {
+                    Console.WriteLine("created {0}", path);
+                });
+        }
+
+        private static void BumpMajorVersion(BumpMajorVersionOptions options)
+        {
+            ModifyConfig(options.Path,
+                transform: config =>
+                {
+                    config.Major++;
+                    config.Minor = 0;
+                },
+                success: (config, path) =>
+                {
+                    Console.WriteLine("Version bumpted to {0}.{1}", config.Major, config.Minor);
+                });
+        }
+
+        private static void BumpMinorVersion(BumpMinorVersionOptions options)
+        {
+            ModifyConfig(options.Path,
+                transform: config =>
+                {
+                    config.Minor++;
+                },
+                success: (config, path) =>
+                {
+                    Console.WriteLine("Version bumpted to {0}.{1}", config.Major, config.Minor);
+                });
         }
 
         private static void RunOptionsAndReturnExitCode(Options options)
