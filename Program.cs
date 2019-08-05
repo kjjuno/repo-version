@@ -13,11 +13,67 @@ namespace repo_version
     {
         static void Main(string[] args)
         {
-            Parser.Default.ParseArguments<Options>(args)
-                .WithParsed<Options>(options => RunOptionsAndReturnExitCode(options))
-                .WithNotParsed<Options>((errors) => HandleParseErrors(errors));
+            var parser = new Parser(o =>
+            {
+                o.HelpWriter = null;
+            });
+
+            var result = parser.ParseArguments<Options, InitOptions>(args);
+
+            if ((result is NotParsed<object>) && ((NotParsed<object>)result).Errors.Any(o => o.Tag == ErrorType.NoVerbSelectedError || o.Tag == ErrorType.BadVerbSelectedError))
+            {
+                Parser.Default.ParseArguments<Options>(args)
+                    .WithParsed<Options>(options => RunOptionsAndReturnExitCode(options))
+                    .WithNotParsed<Options>((errors) => HandleParseErrors(errors));
+            }
+            else
+            {
+                Parser.Default.ParseArguments<Options, InitOptions>(args)
+                    .WithParsed<InitOptions>(options => Init(options))
+                    .WithNotParsed((errors) => HandleParseErrors(errors));
+            }
         }
 
+        private static void Init(InitOptions options)
+        {
+            var gitFolder = FindGitFolder(options.Path);
+
+            if (gitFolder == null)
+            {
+                Console.WriteLine("not a git repository");
+                return;
+            }
+
+            var config = Configuration.Load(gitFolder);
+
+            if (config == null)
+            {
+                return;
+            }
+
+            Console.WriteLine("Please enter the major and minor versions for this repository");
+            Console.Write("Major: ({0}) ", config.Major);
+            var input = Console.ReadLine();
+
+            if (!string.IsNullOrEmpty(input) && int.TryParse(input, out var major))
+            {
+                config.Major = major;
+            }
+
+            Console.Write("Minor: ({0}) ", config.Minor);
+            input = Console.ReadLine();
+
+            if (!string.IsNullOrEmpty(input) && int.TryParse(input, out var minor))
+            {
+                config.Minor = minor;
+            }
+
+            var json = JsonConvert.SerializeObject(config, Formatting.Indented);
+            var path = Path.Combine(gitFolder, "repo-version.json");
+            File.WriteAllText(path, json);
+
+            Console.WriteLine("created {0}", path);
+        }
 
         private static void RunOptionsAndReturnExitCode(Options options)
         {

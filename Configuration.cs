@@ -7,8 +7,13 @@ namespace repo_version
 {
     class Configuration
     {
+        [JsonProperty("major", Order = 0)]
         public int Major { get; set; } 
+
+        [JsonProperty("minor", Order = 1)]
         public int Minor { get; set; } 
+
+        [JsonProperty("branches", Order = 2)]
         public List<BranchConfig> Branches { get; set; }
 
         public static Configuration Load(string path)
