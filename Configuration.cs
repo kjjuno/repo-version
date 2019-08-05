@@ -59,6 +59,10 @@ namespace repo_version
                     return null;
                 }
             }
+            else
+            {
+                config = defaultConfig;
+            }
 
             return config;
         }
