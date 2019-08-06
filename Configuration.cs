@@ -7,13 +7,18 @@ namespace repo_version
 {
     class Configuration
     {
+        [JsonProperty("major", Order = 0)]
         public int Major { get; set; } 
+
+        [JsonProperty("minor", Order = 1)]
         public int Minor { get; set; } 
+
+        [JsonProperty("branches", Order = 2)]
         public List<BranchConfig> Branches { get; set; }
 
-        public static Configuration Load(string path)
+        public static Configuration Load(string path, bool useDefaults)
         {
-            var config = new Configuration();
+            Configuration config = null;
             var defaultConfig = new Configuration();
             defaultConfig.Major = 0;
             defaultConfig.Minor = 1;
@@ -53,6 +58,10 @@ namespace repo_version
                     Console.WriteLine("Unable to load repo-version.json. {0}", e.Message);
                     return null;
                 }
+            }
+            else if (useDefaults)
+            {
+                config = defaultConfig;
             }
 
             return config;
