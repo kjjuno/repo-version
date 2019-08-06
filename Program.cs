@@ -2,48 +2,75 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
-using CommandLine;
 using LibGit2Sharp;
 using Newtonsoft.Json;
 using System.Linq;
+using System.Reflection;
 
 namespace repo_version
 {
     class Program
     {
-        static void Main(string[] args)
+
+        static int Main(string[] args)
         {
-            var parser = new Parser(o =>
-            {
-                o.HelpWriter = null;
-            });
+            var op = Options.Parse(args);
 
-            var result = parser.ParseArguments<Options, InitOptions, BumpMajorVersionOptions, BumpMinorVersionOptions>(args);
-
-            if ((result is NotParsed<object>) && ((NotParsed<object>)result).Errors.Any(o => o.Tag == ErrorType.NoVerbSelectedError || o.Tag == ErrorType.BadVerbSelectedError))
+            if (op.ShowHelp)
             {
-                Parser.Default.ParseArguments<Options>(args)
-                    .WithParsed<Options>(options => RunOptionsAndReturnExitCode(options))
-                    .WithNotParsed<Options>((errors) => HandleParseErrors(errors));
+                Console.WriteLine(op.PrintHelp());
+                return 1;
+            }
+
+            var code = 0;
+
+            if (op.ShowVersion)
+            {
+                code = ShowVersion();
+            }
+            else if (op.Verb == "init")
+            {
+                code = Init(op);
+            }
+            else if (op.Verb == "major")
+            {
+                code = BumpMajorVersion(op);
+            }
+            else if (op.Verb == "minor")
+            {
+                code = BumpMinorVersion(op);
             }
             else
             {
-                Parser.Default.ParseArguments<Options, InitOptions, BumpMajorVersionOptions, BumpMinorVersionOptions>(args)
-                    .WithParsed<InitOptions>(options => Init(options))
-                    .WithParsed<BumpMajorVersionOptions>(options => BumpMajorVersion(options))
-                    .WithParsed<BumpMinorVersionOptions>(options => BumpMinorVersion(options))
-                    .WithNotParsed((errors) => HandleParseErrors(errors));
+                code = DisplayVersion(op);
             }
+
+            return code;
         }
 
-        private static void ModifyConfig(string path, bool create, Action<Configuration> transform, Action<Configuration, string> success)
+        private static int ShowVersion()
+        {
+            IEnumerable<Attribute> attrs = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyInformationalVersionAttribute));
+            var attr = attrs?.FirstOrDefault() as AssemblyInformationalVersionAttribute;
+
+            if (attr != null)
+            {
+                Console.WriteLine($"repo-version: {attr.InformationalVersion}");
+                return 0;
+            }
+
+            Console.WriteLine("Something went wrong");
+            return 1;
+        }
+
+        private static int ModifyConfig(string path, bool create, Action<Configuration> transform, Action<Configuration, string> success)
         {
             var gitFolder = FindGitFolder(path);
 
             if (gitFolder == null)
             {
                 Console.WriteLine("not a git repository");
-                return;
+                return 1;
             }
 
             var config = Configuration.Load(gitFolder, create);
@@ -51,7 +78,7 @@ namespace repo_version
             if (config == null)
             {
                 Console.WriteLine("No repo-version.json file. Please run repo-version init");
-                return;
+                return 1;
             }
 
             transform(config);
@@ -61,11 +88,12 @@ namespace repo_version
             File.WriteAllText(path, json);
 
             success(config, path);
+            return 0;
         }
 
-        private static void Init(InitOptions options)
+        private static int Init(Options options)
         {
-            ModifyConfig(options.Path,
+            return ModifyConfig(options.Path,
                 create: true,
                 transform: config =>
                 {
@@ -92,9 +120,9 @@ namespace repo_version
                 });
         }
 
-        private static void BumpMajorVersion(BumpMajorVersionOptions options)
+        private static int BumpMajorVersion(Options options)
         {
-            ModifyConfig(options.Path,
+            return ModifyConfig(options.Path,
                 create: false,
                 transform: config =>
                 {
@@ -107,9 +135,9 @@ namespace repo_version
                 });
         }
 
-        private static void BumpMinorVersion(BumpMinorVersionOptions options)
+        private static int BumpMinorVersion(Options options)
         {
-            ModifyConfig(options.Path,
+            return ModifyConfig(options.Path,
                 create: false,
                 transform: config =>
                 {
@@ -121,14 +149,13 @@ namespace repo_version
                 });
         }
 
-        private static void RunOptionsAndReturnExitCode(Options options)
+        private static int DisplayVersion(Options options)
         {
             var response = CalculateVersion(options.Path, options);
 
             if (response == null)
             {
-                Environment.ExitCode = 1;
-                return;
+                return 1;
             }
 
             if (string.Compare(options.Format, "json", StringComparison.OrdinalIgnoreCase) == 0)
@@ -140,13 +167,7 @@ namespace repo_version
                 Console.WriteLine(response.SemVer);
             }
 
-            Environment.ExitCode = 0;
-        }
-
-        private static void HandleParseErrors(IEnumerable<Error> errors)
-        {
-            Console.WriteLine();
-            Environment.ExitCode = 1;
+            return 1;
         }
 
         private static string FindGitFolder(string path)
