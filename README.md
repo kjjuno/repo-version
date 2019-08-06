@@ -111,3 +111,11 @@ git workflow that I use. Below are my initial thoughts for the first version.
 4. patch and commits are controlled by commits since tag.
 5. only need current branch to calculate version (no more bad versions without master)
 
+## Roadmap
+
+### 0.1
+Early stages. The general algorithm for calculating a version works. The api surface is still being designed and is likely to change.
+
+### 0.2
+Api surface should be mostly stable. Documentation should be up to date and accurate
+
