@@ -24,7 +24,7 @@ During your development you currently have 3 commits on your feature branch.
 
 ```
 $ repo-version
-1.2.2.3-fix-null-reference
+1.2.3.3-fix-null-reference
 ```
 
 or for more verbose output
@@ -53,7 +53,7 @@ $ repo-version
 When you are ready to finish the 1.2.3.x release you should tag the final commit.
 
 ```
-git tag $(repo-version)
+repo-version tag
 git push --tags
 ```
 
