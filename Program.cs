@@ -103,6 +103,9 @@ namespace repo_version
                 {
                     var version = CalculateVersion(options);
 
+                    config.Major = version.Major;
+                    config.Minor = version.Minor;
+
                     Console.WriteLine("Please enter the major and minor versions for this repository");
                     Console.Write("Major: ({0}) ", version.Major);
                     var input = Console.ReadLine();
