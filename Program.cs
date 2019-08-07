@@ -101,8 +101,10 @@ namespace repo_version
                 create: true,
                 transform: config =>
                 {
+                    var version = CalculateVersion(options);
+
                     Console.WriteLine("Please enter the major and minor versions for this repository");
-                    Console.Write("Major: ({0}) ", config.Major);
+                    Console.Write("Major: ({0}) ", version.Major);
                     var input = Console.ReadLine();
 
                     if (!string.IsNullOrEmpty(input) && int.TryParse(input, out var major))
@@ -110,7 +112,7 @@ namespace repo_version
                         config.Major = major;
                     }
 
-                    Console.Write("Minor: ({0}) ", config.Minor);
+                    Console.Write("Minor: ({0}) ", version.Minor);
                     input = Console.ReadLine();
 
                     if (!string.IsNullOrEmpty(input) && int.TryParse(input, out var minor))
@@ -155,7 +157,7 @@ namespace repo_version
 
         private static int ApplyTag(Options options)
         {
-            var response = CalculateVersion(options.Path, options);
+            var response = CalculateVersion(options);
 
             if (response == null)
             {
@@ -182,7 +184,7 @@ namespace repo_version
 
         private static int DisplayVersion(Options options)
         {
-            var response = CalculateVersion(options.Path, options);
+            var response = CalculateVersion(options);
 
             if (response == null)
             {
@@ -246,9 +248,9 @@ namespace repo_version
             return lastTag;
         }
 
-        public static RepoVersion CalculateVersion(string path, Options options)
+        public static RepoVersion CalculateVersion(Options options)
         {
-            var gitFolder = FindGitFolder(path);
+            var gitFolder = FindGitFolder(options.Path);
 
             if (gitFolder == null)
             {
@@ -319,8 +321,8 @@ namespace repo_version
 
             var response = new RepoVersion
             {
-                Major = Math.Max(major, config.Major),
-                Minor = Math.Max(minor, config.Minor),
+                Major = major,
+                Minor = minor,
                 Patch = patch,
                 Commits = commits,
                 PreReleaseTag = preReleaseTag,
