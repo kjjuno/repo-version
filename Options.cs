@@ -64,7 +64,7 @@ namespace repo_version
                     default:
                         if (!arg.StartsWith("-") && i == args.Length - 1)
                         {
-                            if (File.Exists(arg))
+                            if (Directory.Exists(arg))
                             {
                                 options.Path = arg;
                             }
