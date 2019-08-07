@@ -303,13 +303,15 @@ namespace repo_version
                 }
             }
 
+            // Use the major/minor from the config only if it is greater
+            // than the calculated version
             if (config.Major > major)
             {
                 major = config.Major;
                 minor = config.Minor;
                 patch = 0;
             }
-            else if (config.Minor > minor)
+            else if (config.Major == major && config.Minor > minor)
             {
                 minor = config.Minor;
                 patch = 0;
