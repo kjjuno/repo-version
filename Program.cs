@@ -40,6 +40,10 @@ namespace repo_version
             {
                 code = BumpMinorVersion(op);
             }
+            else if (op.Verb == "tag")
+            {
+                code = ApplyTag(op);
+            }
             else
             {
                 code = DisplayVersion(op);
@@ -147,6 +151,33 @@ namespace repo_version
                 {
                     Console.WriteLine("Version bumpted to {0}.{1}", config.Major, config.Minor);
                 });
+        }
+
+        private static int ApplyTag(Options options)
+        {
+            var response = CalculateVersion(options.Path, options);
+
+            if (response == null)
+            {
+                return 1;
+            }
+
+            if (response.IsDirty)
+            {
+                Console.WriteLine("Cannot apply tag with uncommitted changes");
+                return 1;
+            }
+
+            var gitFolder = FindGitFolder(options.Path);
+
+            using (var repo = new Repository(gitFolder))
+            {
+                repo.ApplyTag(response.SemVer);
+            }
+
+            Console.WriteLine($"Created Tag: {response.SemVer}");
+
+            return 0;
         }
 
         private static int DisplayVersion(Options options)

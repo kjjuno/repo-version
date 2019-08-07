@@ -24,7 +24,7 @@ During your development you currently have 3 commits on your feature branch.
 
 ```
 $ repo-version
-1.2.2.3-fix-null-reference
+1.2.3.3-fix-null-reference
 ```
 
 or for more verbose output
@@ -50,19 +50,32 @@ $ repo-version
 1.2.3.4
 ```
 
-When you are ready to finish the 1.2.3.x release you should tag the final commit.
+## Tagging
+
+Tags indicate to `repo-version` that the current patch is official, and versions should begin counting toward the next patch.
+It will be typical to branch from master, and merge back to master, and tag each one of those merges with the official version.
+
+So, with our example above let's say you are ready to complete the 1.2.3.x release. We accomplish that with a git tag.
+`repo-version` has built in support to help with this.
 
 ```
-git tag $(repo-version)
-git push --tags
+repo-version tag
 ```
 
-The next commit will be be automatically bumped to `1.2.4.1`
+This will apply the current version as a tag. The next commit will be be automatically bumped to `1.2.4.1`
 
-## repo-version.json
-This file should be created at the root of your repository. This will
-control the major and minor versions, as well as provide pre-release tags based
-on branch names.
+## Working with repo-version.json
+This file should be created at the root of your repository. If none exists the default seetings will be used.
+However, this will control the major and minor versions, as well as provide pre-release tags based on branch names.
+It is recommended to include the file, if for no other reason than to manipulate the major and minor versions.
+
+There are several commands that will assist you in working with this file. The most important one is `init`
+
+### init
+```
+repo-version init
+```
+This will guide you through the initial setup and will produce a file like this at the root of your repository.
 
 repo-version.json
 ```json
@@ -72,7 +85,7 @@ repo-version.json
   "branches": [
     {
       "regex": "^master$",
-      "tag": "alpha"
+      "tag": ""
     },
     {
       "regex": "^support[/-].*$",
@@ -80,7 +93,7 @@ repo-version.json
     },
     {
       "regex": ".+",
-      "tag": "pr-{BranchName}"
+      "tag": "{BranchName}"
     }
   ]
 }
@@ -88,7 +101,20 @@ repo-version.json
 
 The `branches` section is an ordered list of branch configs. When trying to calculate the pre-release tag `repo-version` will do a Regex match against each branch config, and use the first one that it finds.
 
-In the given case the `master` branch is currently in an alpha state, but the support branches are full releases. Everything else will get a name based on the branch name.
+### major
+
+This will bump the version to the next major version
+
+```
+repo-version major
+```
+
+### minor
+This will bump the version to the next minor version
+
+```
+repo-version minor
+```
 
 ## Why not just use GitVersion?
 

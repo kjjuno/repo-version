@@ -30,6 +30,7 @@ namespace repo_version
             help.AppendLine("init                enitializes a repository with a repo-version.json file.");
             help.AppendLine("major               Bumps the version in repo-version.json to the next major version.");
             help.AppendLine("minor               Bumps the version in repo-version.json to the next minor version.");
+            help.AppendLine("tag                 tags the repository with the current version");
 
             return help.ToString();
         }
@@ -59,6 +60,7 @@ namespace repo_version
                     case "init":
                     case "major":
                     case "minor":
+                    case "tag":
                         options.Verb = arg;
                         break;
                     default:
