@@ -1,5 +1,15 @@
-[![Nuget](https://img.shields.io/nuget/v/repo-version?style=plastic)](https://www.nuget.org/packages/repo-version)
-[![Nuget](https://img.shields.io/nuget/dt/repo-version?style=plastic)](https://www.nuget.org/packages/repo-version)
+| package | version | downloads |
+| ------- | ------ | ---------- |
+| repo-version | [![Nuget][repo-version-current-version]][repo-version-nuget] | [![Nuget][repo-version-downloads]][repo-version-nuget] |
+| Cake.RepoVersion | [![Nuget][cake-repo-version-current-version]][cake-repo-version-nuget] | [![Nuget][cake-repo-version-downloads]][cake-repo-version-nuget] |
+
+[repo-version-current-version]: https://img.shields.io/nuget/v/repo-version?style=plastic
+[repo-version-downloads]: https://img.shields.io/nuget/dt/repo-version?style=plastic
+[repo-version-nuget]: https://www.nuget.org/packages/repo-version
+
+[cake-repo-version-current-version]: https://img.shields.io/nuget/v/cake.repoversion?style=plastic
+[cake-repo-version-downloads]: https://img.shields.io/nuget/dt/cake.repoversion?style=plastic
+[cake-repo-version-nuget]: https://www.nuget.org/packages/cake.repoversion
 
 # repo-version
 Automatic versioning for git repositories based tags, and the number of commits since the last tag.
@@ -115,8 +125,21 @@ This will bump the version to the next minor version
 ```
 repo-version minor
 ```
+# Cake.RepoVersion
 
-## Why not just use GitVersion?
+This is a simple wrapper around the repo-version dotnet tool. To use this in Cake you will need to include it as an addin.
+
+```
+#addin nuget:?package=Cake.RepoVersion&version=<version>
+#addin nuget:?package=Newtonsoft.Json&version=11.0.2
+```
+It is important that you also include the addin for `Newtonsoft.Json` and it must be `11.0.2`
+
+```
+var repoVersion = RepoVersion();
+Information(repoVersion.SemVer);
+```
+# Why not just use GitVersion?
 
 For years now I have used GitVersion, but I have a few gripes with it. First, I almost always
 use GitHubFlow, or at least I tend to branch from master, and merge to master. I find myself
@@ -129,7 +152,7 @@ This project aims to acheive the parts of GitVersion that I love, without all of
 As such, this project should be extremely light weight and opinionated. It will only support the
 git workflow that I use. Below are my initial thoughts for the first version.
 
-## 1.0.0 features and assumptions
+# 1.0.0 features and assumptions
 
 1. master is main branch
 2. all branches start from master, and are merged back to master.
@@ -137,11 +160,11 @@ git workflow that I use. Below are my initial thoughts for the first version.
 4. patch and commits are controlled by commits since tag.
 5. only need current branch to calculate version (no more bad versions without master)
 
-## Roadmap
+# Roadmap
 
-### 0.1
+## 0.1
 Early stages. The general algorithm for calculating a version works. The api surface is still being designed and is likely to change.
 
-### 0.2
+## 0.2
 Api surface should be mostly stable. Documentation should be up to date and accurate
 
