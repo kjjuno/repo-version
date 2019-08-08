@@ -75,6 +75,7 @@ Task("Publish")
          };
 
          DotNetCoreNuGetPush($"nupkg/repo-version.{version}.nupkg", settings);
+         DotNetCoreNuGetPush($"nupkg/Cake.RepoVersion.{version}.nupkg", settings);
     });
 
 Task("Install")
