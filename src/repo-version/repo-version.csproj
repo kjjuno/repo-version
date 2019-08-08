@@ -6,7 +6,7 @@
     <RootNamespace>repo_version</RootNamespace>
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>repo-version</ToolCommandName>
-    <PackageOutputPath>./nupkg</PackageOutputPath>
+    <PackageOutputPath>../../nupkg</PackageOutputPath>
     <Authors>kjjuno</Authors>
     <PackageProjectUrl>https://github.com/kjjuno/repo-version</PackageProjectUrl>
   </PropertyGroup>
