@@ -10,7 +10,7 @@ Setup(context =>
     IEnumerable<string> redirectedStandardOutput;
     var exitCodeWithArgument = StartProcess("dotnet", new ProcessSettings 
         {
-            Arguments = "run --output json",
+            Arguments = "run --project src/repo-version/repo-version.csproj --output json",
             RedirectStandardOutput = true
         },
         out redirectedStandardOutput);
