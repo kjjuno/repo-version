@@ -284,7 +284,13 @@ namespace repo_version
             {
                 preReleaseTag = lastTag.PreReleaseTag;
             }
-            // if no tag exists at the current commit, calculate the pre-release tag
+            // If a pre-release tag was specified on the command line use it.
+            else if (options.PreReleaseTag != null)
+            {
+                preReleaseTag = options.PreReleaseTag;
+            }
+            // If no tag exists at the current commit and no pre-release tag was specified
+            // on the command line calculate the pre-release tag
             else
             {
                 preReleaseTag = CalculatePreReleaseTag(repo, config);
