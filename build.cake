@@ -55,12 +55,6 @@ Task("Publish")
 
         Information($"Current Branch: {branch}");
 
-        if (branch != "master")
-        {
-            Information("Not on master branch, no package will be pushed");
-            return;
-        }
-
         var apiKey = EnvironmentVariable("NUGET_API_KEY");
 
         if (string.IsNullOrEmpty(apiKey))
