@@ -159,6 +159,8 @@ git workflow that I use. Below are my initial thoughts for the first version.
 3. major and minor revisions controlled by config file
 4. patch and commits are controlled by commits since tag.
 5. only need current branch to calculate version (no more bad versions without master)
+6. git tags correspond to releases.
+7. releases are pinned to {major}.{minor}.{patch}
 
 # Roadmap
 
