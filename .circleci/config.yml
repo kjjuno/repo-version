@@ -23,6 +23,10 @@ workflows:
       - pack
       - publish:
           context: repo-version-secrets
-    filters:
-      tags:
-        only: /.*/
+          filters:
+            # ignore any commit on any branch by default
+            branches:
+              ignore: /.*/
+              # only act on version tags
+            tags:
+              only: /.*/
