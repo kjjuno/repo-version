@@ -20,7 +20,7 @@ workflows:
   version: 2
   build-and-publish:
     jobs:
-      - pack:
+      - pack
       - publish:
           context: repo-version-secrets
           filters:
