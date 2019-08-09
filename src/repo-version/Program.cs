@@ -279,23 +279,6 @@ namespace repo_version
             var preReleaseTag = "";
             var status = repo.RetrieveStatus();
 
-            // Use the pre-release tag specified by the tag on the current commit
-            if (lastTag != null && commitsSinceTag == 0 && !status.IsDirty)
-            {
-                preReleaseTag = lastTag.PreReleaseTag;
-            }
-            // If a pre-release tag was specified on the command line use it.
-            else if (options.PreReleaseTag != null)
-            {
-                preReleaseTag = options.PreReleaseTag;
-            }
-            // If no tag exists at the current commit and no pre-release tag was specified
-            // on the command line calculate the pre-release tag
-            else
-            {
-                preReleaseTag = CalculatePreReleaseTag(repo, config);
-            }
-
             // If nothing bumped it from the initial version
             // set the version to 0.1.0
             if (major == 0 & minor == 0 && patch == 0)
@@ -326,6 +309,27 @@ namespace repo_version
             {
                 minor = config.Minor;
                 patch = 0;
+            }
+
+            // If we are exactly on a git tag use that pre-release value.
+            if (lastTag != null && commitsSinceTag == 0 && !status.IsDirty)
+            {
+                preReleaseTag = lastTag.PreReleaseTag;
+            }
+            // If a pre-release tag was specified on the command line use it.
+            else if (options.PreReleaseTag != null)
+            {
+                preReleaseTag = options.PreReleaseTag;
+            }
+            // If not exactly on a git tag, but there is a previous tag for the same
+            // {major}.{minor}.{patch}, use the pre-release tag from the last tag
+            else if (lastTag != null && lastTag.Major == major && lastTag.Minor == minor && lastTag.Patch == patch)
+            {
+                preReleaseTag = lastTag.PreReleaseTag;
+            }
+            else
+            {
+                preReleaseTag = CalculatePreReleaseTag(repo, config);
             }
 
             var response = new RepoVersion
