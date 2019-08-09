@@ -27,17 +27,20 @@ namespace repo_version
                 new BranchConfig
                 {
                     Regex = "^master$",
-                    Tag = ""
+                    Tag = "",
+                    IsMainline = true
                 },
                 new BranchConfig
                 {
                     Regex = "^support[/-].*$",
-                    Tag = ""
+                    Tag = "",
+                    IsMainline = true
                 },
                 new BranchConfig
                 {
                     Regex = ".+",
-                    Tag = "{BranchName}"
+                    Tag = "{BranchName}",
+                    IsMainline = false
                 },
             };
             var configFile = Path.Combine(path, "repo-version.json");
