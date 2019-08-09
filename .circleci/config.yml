@@ -23,6 +23,6 @@ workflows:
       - pack
       - publish:
           context: repo-version-secrets
-          filters:
-            tags:
-              only: /.*/
+    filters:
+      tags:
+        only: /.*/
