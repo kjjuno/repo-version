@@ -11,6 +11,7 @@ namespace repo_version
         public bool ShowHelp { get; private set; }
         public string Verb { get; private set; }
         public bool ShowVersion { get; private set; }
+        public string PreReleaseTag { get; private set; }
 
         public string PrintHelp()
         {
@@ -19,9 +20,10 @@ namespace repo_version
             help.AppendLine("typical usage:");
             help.AppendLine("repo-version [--version] [-o | --output <format>] <path>");
             help.AppendLine();
-            help.AppendLine("-o, --output        The output format. Legal values are [text, json]. The default is text.");
-            help.AppendLine("-v, --version       Displays the version of repo-version");
-            help.AppendLine("path                The path to a git repository. The default is the current directory.");
+            help.AppendLine("-o, --output             The output format. Legal values are [text, json]. The default is text.");
+            help.AppendLine("-t, --pre-release-tag    Overrides the pre-release-tag. If not provided it will be calculated.");
+            help.AppendLine("-v, --version            Displays the version of repo-version");
+            help.AppendLine("path                     The path to a git repository. The default is the current directory.");
             help.AppendLine();
             help.AppendLine("manipulate config file:");
             help.AppendLine("repo-version <command> <path>");
@@ -49,6 +51,15 @@ namespace repo_version
                     case "--output":
                         options.Format = GetStringArg(++i, args);
                         break;
+                    case "-t":
+                    case "--pre-release-tag":
+                        options.PreReleaseTag = GetStringArg(++i, args);
+                        if (options.PreReleaseTag == null)
+                        {
+                            options.ShowHelp = true;
+                            Console.Error.WriteLine("Expected a pre-release-tag to be specified.");
+                        }
+                        break;
                     case "-v":
                     case "--version":
                         options.ShowVersion = true;
@@ -61,7 +72,15 @@ namespace repo_version
                     case "major":
                     case "minor":
                     case "tag":
-                        options.Verb = arg;
+                        if (i == 0)
+                        {
+                            options.Verb = arg;
+                        }
+                        else
+                        {
+                            options.ShowHelp = true;
+                            Console.Error.WriteLine($"unexpected command {arg}. Should be the first argument");
+                        }
                         break;
                     default:
                         if (!arg.StartsWith("-") && i == args.Length - 1)
