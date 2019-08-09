@@ -311,6 +311,8 @@ namespace repo_version
                 patch = 0;
             }
 
+            var (configPreReleaseTag, isMainline) = CalculatePreReleaseTag(repo, config);
+
             // If we are exactly on a git tag use that pre-release value.
             if (lastTag != null && commitsSinceTag == 0 && !status.IsDirty)
             {
@@ -321,15 +323,16 @@ namespace repo_version
             {
                 preReleaseTag = options.PreReleaseTag;
             }
-            // If not exactly on a git tag, but there is a previous tag for the same
-            // {major}.{minor}.{patch}, use the pre-release tag from the last tag
-            else if (lastTag != null && lastTag.Major == major && lastTag.Minor == minor && lastTag.Patch == patch)
+            // If on a mainline branch but on a tagged commit, but there is a
+            // previous tag for the same {major}.{minor}.{patch}, use the
+            // pre-release tag from the last tag
+            else if (isMainline && lastTag != null && lastTag.Major == major && lastTag.Minor == minor && lastTag.Patch == patch)
             {
                 preReleaseTag = lastTag.PreReleaseTag;
             }
             else
             {
-                preReleaseTag = CalculatePreReleaseTag(repo, config);
+                preReleaseTag = configPreReleaseTag;
             }
 
             var response = new RepoVersion
@@ -357,10 +360,11 @@ namespace repo_version
             return v;
         }
 
-        private static string CalculatePreReleaseTag(Repository repo, Configuration config)
+        private static (string, bool) CalculatePreReleaseTag(Repository repo, Configuration config)
         {
             bool found = false;
             var preReleaseTag = "";
+            var isMainline = false;
             var branch = repo.Head.FriendlyName;
 
             if (config?.Branches != null)
@@ -370,6 +374,7 @@ namespace repo_version
                     if (Regex.IsMatch(branch, branchConfig.Regex))
                     {
                         preReleaseTag = branchConfig.Tag;
+                        isMainline = branchConfig.IsMainline;
                         found = true;
                         break;
                     }
@@ -404,7 +409,7 @@ namespace repo_version
                 .Substring(0, Math.Min(30, preReleaseTag.Length))
                 .TrimEnd('-');
 
-            return preReleaseTag;
+            return (preReleaseTag, isMainline);
         }
     }
 }
