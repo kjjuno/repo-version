@@ -27,19 +27,19 @@ namespace repo_version
                 new BranchConfig
                 {
                     Regex = "^master$",
-                    Tag = "",
+                    DefaultLabel = "",
                     IsMainline = true
                 },
                 new BranchConfig
                 {
                     Regex = "^support[/-].*$",
-                    Tag = "",
+                    DefaultLabel = "",
                     IsMainline = true
                 },
                 new BranchConfig
                 {
                     Regex = ".+",
-                    Tag = "{BranchName}",
+                    DefaultLabel = "{BranchName}",
                     IsMainline = false
                 },
             };

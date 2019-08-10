@@ -95,15 +95,18 @@ repo-version.json
   "branches": [
     {
       "regex": "^master$",
-      "tag": ""
+      "defaultLabel": "",
+      "mainline": true
     },
     {
       "regex": "^support[/-].*$",
-      "tag": ""
+      "defaultLabel": "",
+      "mainline": true
     },
     {
       "regex": ".+",
-      "tag": "{BranchName}"
+      "defaultLabel": "{BranchName}",
+      "mainline": true
     }
   ]
 }
