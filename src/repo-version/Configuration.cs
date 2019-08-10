@@ -21,25 +21,25 @@ namespace repo_version
             Configuration config = null;
             var defaultConfig = new Configuration();
             defaultConfig.Major = 0;
-            defaultConfig.Minor = 1;
+            defaultConfig.Minor = 0;
             defaultConfig.Branches = new List<BranchConfig>
             {
                 new BranchConfig
                 {
                     Regex = "^master$",
-                    Tag = "",
+                    DefaultLabel = "",
                     IsMainline = true
                 },
                 new BranchConfig
                 {
                     Regex = "^support[/-].*$",
-                    Tag = "",
+                    DefaultLabel = "",
                     IsMainline = true
                 },
                 new BranchConfig
                 {
                     Regex = ".+",
-                    Tag = "{BranchName}",
+                    DefaultLabel = "{BranchName}",
                     IsMainline = false
                 },
             };

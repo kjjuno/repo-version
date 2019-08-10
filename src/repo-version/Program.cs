@@ -285,7 +285,8 @@ namespace repo_version
             {
                 minor = 1;
             }
-            else if (commitsSinceTag > 0)
+
+            if (commitsSinceTag > 0)
             {
                 commits += commitsSinceTag;
 
@@ -373,7 +374,7 @@ namespace repo_version
                 {
                     if (Regex.IsMatch(branch, branchConfig.Regex))
                     {
-                        preReleaseTag = branchConfig.Tag;
+                        preReleaseTag = branchConfig.DefaultLabel ?? "";
                         isMainline = branchConfig.IsMainline;
                         found = true;
                         break;
