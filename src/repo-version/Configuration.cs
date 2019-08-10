@@ -21,7 +21,7 @@ namespace repo_version
             Configuration config = null;
             var defaultConfig = new Configuration();
             defaultConfig.Major = 0;
-            defaultConfig.Minor = 0;
+            defaultConfig.Minor = 1;
             defaultConfig.Branches = new List<BranchConfig>
             {
                 new BranchConfig
