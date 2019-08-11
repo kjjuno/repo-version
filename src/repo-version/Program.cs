@@ -291,7 +291,7 @@ namespace repo_version
                 commits += commitsSinceTag;
 
                 // Only increase the patch if there is no pre-release tag on the last git tag
-                if (lastTag?.PreReleaseTag == "")
+                if (lastTag?.Label == "")
                 {
                     patch++;
                     commits = commitsSinceTag;
@@ -317,7 +317,7 @@ namespace repo_version
             // If we are exactly on a git tag use that pre-release value.
             if (lastTag != null && commitsSinceTag == 0 && !status.IsDirty)
             {
-                preReleaseTag = lastTag.PreReleaseTag;
+                preReleaseTag = lastTag.Label;
             }
             // If a pre-release tag was specified on the command line use it.
             else if (options.Label != null)
@@ -329,7 +329,7 @@ namespace repo_version
             // pre-release tag from the last tag
             else if (isMainline && lastTag != null && lastTag.Major == major && lastTag.Minor == minor && lastTag.Patch == patch)
             {
-                preReleaseTag = lastTag.PreReleaseTag;
+                preReleaseTag = lastTag.Label;
             }
             else
             {
@@ -342,7 +342,7 @@ namespace repo_version
                 Minor = minor,
                 Patch = patch,
                 Commits = commits,
-                PreReleaseTag = preReleaseTag,
+                Label = preReleaseTag,
                 IsDirty = status.IsDirty
             };
 
