@@ -11,7 +11,7 @@ namespace repo_version
         public bool ShowHelp { get; private set; }
         public string Verb { get; private set; }
         public bool ShowVersion { get; private set; }
-        public string PreReleaseTag { get; private set; }
+        public string Label { get; private set; }
 
         public string PrintHelp()
         {
@@ -21,7 +21,7 @@ namespace repo_version
             help.AppendLine("repo-version [--version] [-o | --output <format>] <path>");
             help.AppendLine();
             help.AppendLine("-o, --output             The output format. Legal values are [text, json]. The default is text.");
-            help.AppendLine("-t, --pre-release-tag    Overrides the pre-release-tag. If not provided it will be calculated.");
+            help.AppendLine("-l, --label              Overrides the current label. If not provided it will be calculated.");
             help.AppendLine("-v, --version            Displays the version of repo-version");
             help.AppendLine("path                     The path to a git repository. The default is the current directory.");
             help.AppendLine();
@@ -51,13 +51,13 @@ namespace repo_version
                     case "--output":
                         options.Format = GetStringArg(++i, args);
                         break;
-                    case "-t":
-                    case "--pre-release-tag":
-                        options.PreReleaseTag = GetStringArg(++i, args);
-                        if (options.PreReleaseTag == null)
+                    case "-l":
+                    case "--label":
+                        options.Label = GetStringArg(++i, args);
+                        if (options.Label == null)
                         {
                             options.ShowHelp = true;
-                            Console.Error.WriteLine("Expected a pre-release-tag to be specified.");
+                            Console.Error.WriteLine("Expected a label to be specified.");
                         }
                         break;
                     case "-v":
