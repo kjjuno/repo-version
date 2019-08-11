@@ -1,3 +1,7 @@
+# repo-version
+
+Automatic versioning for git repositories based tags, and the number of commits since the last tag.
+
 | package | version | downloads |
 | ------- | ------ | ---------- |
 | repo-version | [![Nuget][repo-version-current-version]][repo-version-nuget] | [![Nuget][repo-version-downloads]][repo-version-nuget] |
@@ -11,17 +15,15 @@
 [cake-repo-version-downloads]: https://img.shields.io/nuget/dt/cake.repoversion?style=plastic
 [cake-repo-version-nuget]: https://www.nuget.org/packages/cake.repoversion
 
-# repo-version
-Automatic versioning for git repositories based tags, and the number of commits since the last tag.
-
 ## Install
 
-```
+```bash
 dotnet tool install -g repo-version
 ```
 
 ## Update
-```
+
+```bash
 dotnet tool update -g repo-version
 ```
 
@@ -32,14 +34,14 @@ You need to be somewhere within a git repository to run `repo-version`. Alternat
 Let's say you have branched off of master at tag 1.2.2.1 and created a branch named `feature/fix-null-reference`.
 During your development you currently have 3 commits on your feature branch.
 
-```
+```bash
 $ repo-version
 1.2.3.3-fix-null-reference
 ```
 
 or for more verbose output
 
-```
+```bash
 $ repo-version -o json
 {
     "SemVer": "1.2.3.3-fix-null-reference",
@@ -55,7 +57,7 @@ $ repo-version -o json
 Now, let's say that your branch is ready to be merged, and you use a merge commit strategy. This will add 1 more commit.
 Now on the master branch we run `repo-version` again.
 
-```
+```bash
 $ repo-version
 1.2.3.4
 ```
@@ -68,13 +70,14 @@ It will be typical to branch from master, and merge back to master, and tag each
 So, with our example above let's say you are ready to complete the 1.2.3.x release. We accomplish that with a git tag.
 `repo-version` has built in support to help with this.
 
-```
+```bash
 repo-version tag
 ```
 
 This will apply the current version as a tag. The next commit will be be automatically bumped to `1.2.4.1`
 
 ## Working with repo-version.json
+
 This file should be created at the root of your repository. If none exists the default seetings will be used.
 However, this will control the major and minor versions, as well as provide pre-release tags based on branch names.
 It is recommended to include the file, if for no other reason than to manipulate the major and minor versions.
@@ -82,12 +85,15 @@ It is recommended to include the file, if for no other reason than to manipulate
 There are several commands that will assist you in working with this file. The most important one is `init`
 
 ### init
-```
+
+```bash
 repo-version init
 ```
+
 This will guide you through the initial setup and will produce a file like this at the root of your repository.
 
 repo-version.json
+
 ```json
 {
   "major": 0,
@@ -118,31 +124,35 @@ The `branches` section is an ordered list of branch configs. When trying to calc
 
 This will bump the version to the next major version
 
-```
+```bash
 repo-version major
 ```
 
 ### minor
+
 This will bump the version to the next minor version
 
-```
+```bash
 repo-version minor
 ```
-# Cake.RepoVersion
+
+## Cake.RepoVersion
 
 This is a simple wrapper around the repo-version dotnet tool. To use this in Cake you will need to include it as an addin.
 
-```
+```bash
 #addin nuget:?package=Cake.RepoVersion&version=<version>
 #addin nuget:?package=Newtonsoft.Json&version=11.0.2
 ```
+
 It is important that you also include the addin for `Newtonsoft.Json` and it must be `11.0.2`
 
-```
+```bash
 var repoVersion = RepoVersion();
 Information(repoVersion.SemVer);
 ```
-# Why not just use GitVersion?
+
+## Why not just use GitVersion
 
 For years now I have used GitVersion, but I have a few gripes with it. First, I almost always
 use GitHubFlow, or at least I tend to branch from master, and merge to master. I find myself
@@ -155,7 +165,7 @@ This project aims to acheive the parts of GitVersion that I love, without all of
 As such, this project should be extremely light weight and opinionated. It will only support the
 git workflow that I use. Below are my initial thoughts for the first version.
 
-# 1.0.0 features and assumptions
+## 1.0.0 features and assumptions
 
 1. master is main branch
 2. all branches start from master, and are merged back to master.
@@ -165,11 +175,12 @@ git workflow that I use. Below are my initial thoughts for the first version.
 6. git tags correspond to releases.
 7. releases are pinned to {major}.{minor}.{patch}
 
-# Roadmap
+## Roadmap
 
-## 0.1
+### 0.1
+
 Early stages. The general algorithm for calculating a version works. The api surface is still being designed and is likely to change.
 
-## 0.2
-Api surface should be mostly stable. Documentation should be up to date and accurate
+### 0.2
 
+Api surface should be mostly stable. Documentation should be up to date and accurate
