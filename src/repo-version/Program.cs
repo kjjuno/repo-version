@@ -276,7 +276,7 @@ namespace repo_version
             var patch = lastTag?.Patch ?? 0;
             var commits = lastTag?.Commits ?? 0;
 
-            var preReleaseTag = "";
+            var label = "";
             var status = repo.RetrieveStatus();
 
             // If nothing bumped it from the initial version
@@ -291,7 +291,7 @@ namespace repo_version
                 commits += commitsSinceTag;
 
                 // Only increase the patch if there is no pre-release tag on the last git tag
-                if (lastTag?.PreReleaseTag == "")
+                if (lastTag?.Label == "")
                 {
                     patch++;
                     commits = commitsSinceTag;
@@ -312,28 +312,28 @@ namespace repo_version
                 patch = 0;
             }
 
-            var (configPreReleaseTag, isMainline) = CalculatePreReleaseTag(repo, config);
+            var (configLabel, isMainline) = CalculateLabel(repo, config);
 
             // If we are exactly on a git tag use that pre-release value.
             if (lastTag != null && commitsSinceTag == 0 && !status.IsDirty)
             {
-                preReleaseTag = lastTag.PreReleaseTag;
+                label = lastTag.Label;
             }
             // If a pre-release tag was specified on the command line use it.
             else if (options.Label != null)
             {
-                preReleaseTag = options.Label;
+                label = options.Label;
             }
             // If on a mainline branch but on a tagged commit, but there is a
             // previous tag for the same {major}.{minor}.{patch}, use the
             // pre-release tag from the last tag
             else if (isMainline && lastTag != null && lastTag.Major == major && lastTag.Minor == minor && lastTag.Patch == patch)
             {
-                preReleaseTag = lastTag.PreReleaseTag;
+                label = lastTag.Label;
             }
             else
             {
-                preReleaseTag = configPreReleaseTag;
+                label = configLabel;
             }
 
             var response = new RepoVersion
@@ -342,7 +342,7 @@ namespace repo_version
                 Minor = minor,
                 Patch = patch,
                 Commits = commits,
-                PreReleaseTag = preReleaseTag,
+                Label = label,
                 IsDirty = status.IsDirty
             };
 
@@ -361,10 +361,10 @@ namespace repo_version
             return v;
         }
 
-        private static (string, bool) CalculatePreReleaseTag(Repository repo, Configuration config)
+        private static (string, bool) CalculateLabel(Repository repo, Configuration config)
         {
             bool found = false;
-            var preReleaseTag = "";
+            var label = "";
             var isMainline = false;
             var branch = repo.Head.FriendlyName;
 
@@ -374,7 +374,7 @@ namespace repo_version
                 {
                     if (Regex.IsMatch(branch, branchConfig.Regex))
                     {
-                        preReleaseTag = branchConfig.DefaultLabel ?? "";
+                        label = branchConfig.DefaultLabel ?? "";
                         isMainline = branchConfig.IsMainline;
                         found = true;
                         break;
@@ -384,10 +384,10 @@ namespace repo_version
 
             if (!found)
             {
-                preReleaseTag = "{BranchName}";
+                label = "{BranchName}";
             }
 
-            if (preReleaseTag.Contains("{BranchName}"))
+            if (label.Contains("{BranchName}"))
             {
                 var idx = branch.LastIndexOf('/');
                 if (idx >= 0)
@@ -395,22 +395,22 @@ namespace repo_version
                     branch = branch.Substring(idx + 1);
                 }
 
-                preReleaseTag = preReleaseTag
+                label = label
                     .Replace("{BranchName}", branch);
             }
 
-            preReleaseTag = preReleaseTag
+            label = label
                 .Replace("(no branch)", "detached-head")
                 .Replace('_', '-')
                 .Replace("(", "")
                 .Replace(")", "")
                 .Replace(" ", "-");
 
-            preReleaseTag = preReleaseTag
-                .Substring(0, Math.Min(30, preReleaseTag.Length))
+            label = label
+                .Substring(0, Math.Min(30, label.Length))
                 .TrimEnd('-');
 
-            return (preReleaseTag, isMainline);
+            return (label, isMainline);
         }
     }
 }

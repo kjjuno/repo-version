@@ -5,15 +5,15 @@ namespace repo_version
 {
     class RepoVersion : IComparable
     {
-        private string _tag;
+        private string _label;
 
         public string SemVer
         {
             get
             {
-                if (!string.IsNullOrEmpty(PreReleaseTag))
+                if (!string.IsNullOrEmpty(Label))
                 {
-                    return $"{Major}.{Minor}.{Patch}.{Commits}-{PreReleaseTag}{DirtyString()}";
+                    return $"{Major}.{Minor}.{Patch}.{Commits}-{Label}{DirtyString()}";
                 }
 
                 return $"{Major}.{Minor}.{Patch}.{Commits}{DirtyString()}";
@@ -24,10 +24,10 @@ namespace repo_version
         public int Patch { get; set; }
         public int Commits { get; set; }
         public bool IsDirty { get; set; }
-        public string PreReleaseTag
+        public string Label
         {
-            get => _tag ?? string.Empty;
-            set => _tag = value;
+            get => _label ?? string.Empty;
+            set => _label = value;
         }
 
         public override string ToString()
@@ -64,7 +64,7 @@ namespace repo_version
             version.Minor = ParseInt(match.Groups["minor"].Value);
             version.Patch = ParseInt(match.Groups["patch"].Value);
             version.Commits = ParseInt(match.Groups["commits"].Value);
-            version.PreReleaseTag = match.Groups["tag"].Value ?? "";
+            version.Label = match.Groups["tag"].Value ?? "";
 
             return true;
         }
@@ -106,7 +106,7 @@ namespace repo_version
                 return commits;
             }
 
-            return this.PreReleaseTag.CompareTo(other.PreReleaseTag);
+            return this.Label.CompareTo(other.Label);
         }
     }
 }

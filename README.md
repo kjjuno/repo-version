@@ -1,3 +1,7 @@
+# repo-version
+
+Automatic versioning for git repositories based tags, and the number of commits since the last tag.
+
 | package | version | downloads |
 | ------- | ------ | ---------- |
 | repo-version | [![Nuget][repo-version-current-version]][repo-version-nuget] | [![Nuget][repo-version-downloads]][repo-version-nuget] |
@@ -11,51 +15,69 @@
 [cake-repo-version-downloads]: https://img.shields.io/nuget/dt/cake.repoversion?style=plastic
 [cake-repo-version-nuget]: https://www.nuget.org/packages/cake.repoversion
 
-# repo-version
-Automatic versioning for git repositories based tags, and the number of commits since the last tag.
+## Quick Start
 
-## Install
+Install
 
-```
+```bash
 dotnet tool install -g repo-version
 ```
 
-## Update
-```
+Update
+
+```bash
 dotnet tool update -g repo-version
 ```
 
-## Usage
-
 You need to be somewhere within a git repository to run `repo-version`. Alternatively, you can provide a path as an argument.
 
-Let's say you have branched off of master at tag 1.2.2.1 and created a branch named `feature/fix-null-reference`.
-During your development you currently have 3 commits on your feature branch.
+Let's say you have branched off of master at tag 1.2.2.1 and created a branch named `bugfix/fix-null-reference`.
+During your development you currently have 2 commits on your feature branch. And you have some local changes that you have not yet committed.
 
-```
-$ repo-version
-1.2.3.3-fix-null-reference
+run `repo-version` to calculate the current version
+
+```bash
+repo-version
+1.2.3.2-fix-null-reference+1
 ```
 
 or for more verbose output
 
-```
-$ repo-version -o json
+```bash
+repo-version -o json
 {
-    "SemVer": "1.2.3.3-fix-null-reference",
+    "SemVer": "1.2.3.2-fix-null-reference+1",
     "Major": "1",
     "Minor": "2",
     "Patch": "3",
-    "Commits": "3",
-    "PreReleaseTag": "fix-null-reference"
+    "Commits": "2",
+    "IsDirty": true,
+    "Label": "fix-null-reference"
 }
 
 ```
 
+Because you have local changes that have not yet been committed the version is considered dirty and appends the `+1` to the calculated version to indicate that there are additional changes.
+
+For this example we have decided that we want to keep those changes, so we commit those to the git history.
+
+```bash
+repo-version
+1.2.3.3-fix-null-reference
+```
+
+Note that the number of commits went up, and the dirty indicator was dropped.
+
 Now, let's say that your branch is ready to be merged, and you use a merge commit strategy. This will add 1 more commit.
+
+```bash
+git checkout master
+git merge bugfix/fix-null-reference --no-ff
+```
+
 Now on the master branch we run `repo-version` again.
 
-```
+```bash
 $ repo-version
 1.2.3.4
 ```
@@ -68,26 +90,57 @@ It will be typical to branch from master, and merge back to master, and tag each
 So, with our example above let's say you are ready to complete the 1.2.3.x release. We accomplish that with a git tag.
 `repo-version` has built in support to help with this.
 
-```
+```bash
 repo-version tag
 ```
 
 This will apply the current version as a tag. The next commit will be be automatically bumped to `1.2.4.1`
 
-## Working with repo-version.json
-This file should be created at the root of your repository. If none exists the default seetings will be used.
-However, this will control the major and minor versions, as well as provide pre-release tags based on branch names.
-It is recommended to include the file, if for no other reason than to manipulate the major and minor versions.
+## Versioning Rules
 
-There are several commands that will assist you in working with this file. The most important one is `init`
+Each of the 4 numbers in the version mean something specific. This slightly extends the recommendation from semver.
 
-### init
+{major}.{minor}.{patch}.{commits}-{label}
+
+The `label` indicates that the version is a pre-release version. This should be ommited on
+full release versions.
+
+By default `repo-version` will begin a new repository with a version of `0.1.0.x`, where x is the number of commits in the git history.
+Applying a release version tag to the repository will reset the `commits` and increment `patch`.
+
+### Pre-Release Labels
+
+pre-release version tags will not increase the version numbers in any way, however the `label` will persist on main-line branches until a new tag changes or drops the label.
+Take a look at the [Configuration](#Configuration) section for more details on controlling the default label.
+
+### Incrementing Major and Minor Versions
+
+`repo-version` will respect version tags. So, any manually applied tag will increase the version
+to whatever the tag says it is. However, it is recommended that the `major` and `minor` versions
+be controlled in the `repo-version.json` file. (see [Configuration](#Configuration)).
+
+While you are free to modify `repo-version.json` directly, there are convenience commands provided to assist with this task.
+
+Increment `minor` version:
+
+```bash
+repo-version minor
 ```
-repo-version init
-```
-This will guide you through the initial setup and will produce a file like this at the root of your repository.
 
-repo-version.json
+This will increment the minor version by 1 in the config file.
+
+Increment `major` version:
+
+```bash
+repo-version major
+```
+
+This will increment the `major` version by 1, and reset the `minor` version to 0 in the config file.
+
+### Configuration
+
+example repo-version.json located at the root of your git repository
+
 ```json
 {
   "major": 0,
@@ -106,70 +159,102 @@ repo-version.json
     {
       "regex": ".+",
       "defaultLabel": "{BranchName}",
-      "mainline": true
+      "mainline": false
     }
   ]
 }
 ```
 
-The `branches` section is an ordered list of branch configs. When trying to calculate the pre-release tag `repo-version` will do a Regex match against each branch config, and use the first one that it finds.
+This file can be generated by running the following command
 
-### major
-
-This will bump the version to the next major version
-
-```
-repo-version major
+```bash
+repo-version init
 ```
 
-### minor
-This will bump the version to the next minor version
+The `branches` section is an ordered list of branch configs.
+`repo-version` will do a Regex match against each branch config to find the rules that
+should apply to the current branch. The first rule that matches will be used.
+The matching rule will be used to determine the `label`.
 
+The `defaultLabel` indicates which `label` should be applied to commits after a release version.
+So, for example:
+
+You have just released `v3.2.4.9` of a nuget package you maintain. Your `repo-version.json` looks like this:
+
+```json
+{
+  "major": 3,
+  "minor": 2,
+  "branches": [
+    {
+      "regex": "^master$",
+      "defaultLabel": "alpha",
+      "mainline": true
+    },
+    {
+      "regex": "^support[/-].*$",
+      "defaultLabel": "",
+      "mainline": true
+    },
+    {
+      "regex": ".+",
+      "defaultLabel": "{BranchName}",
+      "mainline": false
+    }
+  ]
+}
 ```
-repo-version minor
+
+This configuration specifies that by default the `master` branch should have the `alpha` label.
+The next commit after the `3.2.4.9` tag would be calculated to be `3.2.5.1-alpha`.
+The `alpha` label will persist until the repository is tagged with a different `label`.
+
+Example:
+
+The last tag on `master` is `3.2.5.67-alpha`. There have been 34 additional commits and now the project is now ready to be promoted to a `beta` status. 
+
+Tag the repository with the current version, and change the label to `beta`
+
+```bash
+repo-version tag -l beta
 ```
-# Cake.RepoVersion
+
+This will tag the repository with a `beta` label and will produce this version `3.2.5.101-beta`.
+
+It should be noted that you cannot apply multiple tags to the same commit. So, you will need to make at least an empty commit in order to change the label. 
+
+This strategy should be followed to specify `alpha`, `beta`, `rc`, etc... labels until you are ready to drop the pre-release label all-together.
+So, for our example, if there have been 21 additional commits since the beta tag, and we are ready
+to release this version we would run the following command.
+
+
+```bash
+repo-version tag -l ""
+```
+
+This will apply the `3.2.5.122` tag, and that will complete the `3.2.5.x` version.
+If your branch config sepcifies `alpha` as the `defaultLabel` the next version would be `3.2.6.x-alpha`, where x is the number of commits since the `3.2.5.122` tag.
+
+## Cake.RepoVersion
 
 This is a simple wrapper around the repo-version dotnet tool. To use this in Cake you will need to include it as an addin.
 
-```
+```bash
 #addin nuget:?package=Cake.RepoVersion&version=<version>
 #addin nuget:?package=Newtonsoft.Json&version=11.0.2
 ```
+
 It is important that you also include the addin for `Newtonsoft.Json` and it must be `11.0.2`
 
-```
+```bash
 var repoVersion = RepoVersion();
 Information(repoVersion.SemVer);
 ```
-# Why not just use GitVersion?
 
-For years now I have used GitVersion, but I have a few gripes with it. First, I almost always
-use GitHubFlow, or at least I tend to branch from master, and merge to master. I find myself
-almost always controlling the major/minor revision with the next-version property, and using
-tags and commits to control the rest of the versioning. I do not need, and do not want, all of
-the other features that GitVersion provides. The extra config options it provides have frequently
-led to the inablility to correctly calculate the version during a build on a ci server, or worse,
-a VERY long build time where most of it was trying to calcualate the build on a very large repo.
-This project aims to acheive the parts of GitVersion that I love, without all of the baggage.
-As such, this project should be extremely light weight and opinionated. It will only support the
-git workflow that I use. Below are my initial thoughts for the first version.
+## Roadmap
 
-# 1.0.0 features and assumptions
-
-1. master is main branch
-2. all branches start from master, and are merged back to master.
-3. major and minor revisions controlled by config file
-4. patch and commits are controlled by commits since tag.
-5. only need current branch to calculate version (no more bad versions without master)
-6. git tags correspond to releases.
-7. releases are pinned to {major}.{minor}.{patch}
-
-# Roadmap
-
-## 0.1
-Early stages. The general algorithm for calculating a version works. The api surface is still being designed and is likely to change.
-
-## 0.2
-Api surface should be mostly stable. Documentation should be up to date and accurate
-
+|    | Version | Description                                                                           |
+| -- | ------- | ------------------------------------------------------------------------------------- |
+|    | 0.1     | Proof of concept phase. General algorithm works, but still working out the interface  |
+| -> | 0.2     | Committed to keep the interface from 0.1. Squashing bugs, and working on docs         |
+|    | 0.3     | Interface might change from 0.2. It's unclear yet if this will be compatible with 0.2 |
