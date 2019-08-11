@@ -320,9 +320,9 @@ namespace repo_version
                 preReleaseTag = lastTag.PreReleaseTag;
             }
             // If a pre-release tag was specified on the command line use it.
-            else if (options.PreReleaseTag != null)
+            else if (options.Label != null)
             {
-                preReleaseTag = options.PreReleaseTag;
+                preReleaseTag = options.Label;
             }
             // If on a mainline branch but on a tagged commit, but there is a
             // previous tag for the same {major}.{minor}.{patch}, use the
