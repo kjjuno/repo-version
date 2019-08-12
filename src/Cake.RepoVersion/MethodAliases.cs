@@ -18,7 +18,7 @@ namespace Cake.RepoVersion
         public int Patch { get; set; }
         public int Commits { get; set; }
         public bool IsDirty { get; set; }
-        public string PreReleaseTag { get; set; }
+        public string Label { get; set; }
     }
 
     public static class MethodAliases
