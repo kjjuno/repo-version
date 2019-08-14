@@ -1,0 +1,23 @@
+// For format details, see https://aka.ms/vscode-remote/devcontainer.json or the definition README at
+// https://github.com/microsoft/vscode-dev-containers/tree/master/containers/docker-in-docker
+{
+	"name": "dotnet core SDK 2.2",
+	"image": "kjjuno/dev-dotnet:latest",
+
+	// Uncomment the next line if you want to publish any ports.
+	// "appPort": [],
+
+	// Mount your .ssh folder to /root/.ssh-localhost so we can copy its contents
+	"runArgs": [ "-v", "${env:HOME}${env:USERPROFILE}/.ssh:/root/.ssh-localhost:ro" ],
+
+	// Copy the contents to the correct location and set permissions
+	"postCreateCommand": "mkdir -p ~/.ssh && cp -r ~/.ssh-localhost/* ~/.ssh && chmod 700 ~/.ssh && chmod 600 ~/.ssh/*",
+	"extensions": [
+		"ms-azuretools.vscode-docker"
+	],
+	"settings": {
+	    "remote.extensionKind": {
+			"ms-azuretools.vscode-docker": "workspace"
+		}	
+	}
+}

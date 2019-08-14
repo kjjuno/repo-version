@@ -10,19 +10,13 @@ using Newtonsoft.Json;
 
 namespace Cake.RepoVersion
 {
-    public class RepositoryVersion
+	public static class MethodAliases
     {
-        public string SemVer { get; set; }
-        public int Major { get; set; }
-        public int Minor { get; set; }
-        public int Patch { get; set; }
-        public int Commits { get; set; }
-        public bool IsDirty { get; set; }
-        public string Label { get; set; }
-    }
-
-    public static class MethodAliases
-    {
+        /// <summary>
+        /// Calculates the version of the current repository.
+        /// </summary>
+        /// <param name="context">The <see cref="ICakeContext" />.</param>
+        /// <returns>A <see cref="RepositoryVersion" /> populated with the current repository version.</returns>
         [CakeMethodAlias]
         [CakeNamespaceImport("Cake.RepoVersion")]
         public static RepositoryVersion RepoVersion(this ICakeContext context)
