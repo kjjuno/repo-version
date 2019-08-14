@@ -10,6 +10,9 @@ using Newtonsoft.Json;
 
 namespace Cake.RepoVersion
 {
+    /// <summary>
+    /// Cake Method Aliases for repo-version
+    /// </summary>
 	public static class MethodAliases
     {
         /// <summary>
