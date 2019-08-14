@@ -1,5 +1,8 @@
 namespace Cake.RepoVersion
 {
+    /// <summary>
+    /// The version information for a git repository.
+    /// </summary>
 	public class RepositoryVersion
     {
         /// <summary>

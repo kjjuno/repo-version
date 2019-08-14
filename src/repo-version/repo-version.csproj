@@ -9,6 +9,7 @@
     <PackageOutputPath>../../nupkg</PackageOutputPath>
     <Authors>kjjuno</Authors>
     <PackageProjectUrl>https://github.com/kjjuno/repo-version</PackageProjectUrl>
+    <NoWarn>NU5105</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
