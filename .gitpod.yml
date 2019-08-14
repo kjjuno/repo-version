@@ -1,1 +1,1 @@
-image: mcr.microsoft.com/dotnet/core/sdk:2.2
+image: kjjuno/dev-dotnet
