@@ -10,7 +10,7 @@ jobs:
           command: ./build.sh --target Pack
   publish:
     docker:
-      - image: mcr.microsoft.com/dotnet/core/sdk:2.2
+      - image: kjjuno/dev-dotnet:latest
     steps:
       - checkout
       - run:
