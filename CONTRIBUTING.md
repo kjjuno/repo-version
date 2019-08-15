@@ -34,7 +34,7 @@ optionally you can provide a specific target
 Available Targets:
 
 | Target    | Description                                |
-| ========= | ========================================== |
+| --------- | ------------------------------------------ |
 | Pack      | Creates NuGet packages                     |
 | Publish   | Publishes nuget packages to nuget.org      |
 | Install   | Installs the repo-version tool from source |
