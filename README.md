@@ -2,32 +2,38 @@
 
 Automatic versioning for git repositories based tags, and the number of commits since the last tag.
 
-| package | version | downloads |
-| ------- | ------ | ---------- |
-| repo-version | [![Nuget][repo-version-current-version]][repo-version-nuget] | [![Nuget][repo-version-downloads]][repo-version-nuget] |
+| package          | version                                                                | downloads                                                        |
+| ---------------- | ---------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| repo-version     | [![Nuget][repo-version-current-version]][repo-version-nuget]           | [![Nuget][repo-version-downloads]][repo-version-nuget]           |
 | Cake.RepoVersion | [![Nuget][cake-repo-version-current-version]][cake-repo-version-nuget] | [![Nuget][cake-repo-version-downloads]][cake-repo-version-nuget] |
 
-[repo-version-current-version]: https://img.shields.io/nuget/v/repo-version?style=plastic
-[repo-version-downloads]: https://img.shields.io/nuget/dt/repo-version?style=plastic
-[repo-version-nuget]: https://www.nuget.org/packages/repo-version
+[repo-version-current-version]:      https://img.shields.io/nuget/v/repo-version?style=plastic
+[repo-version-downloads]:            https://img.shields.io/nuget/dt/repo-version?style=plastic
+[repo-version-nuget]:                https://www.nuget.org/packages/repo-version
 
 [cake-repo-version-current-version]: https://img.shields.io/nuget/v/cake.repoversion?style=plastic
-[cake-repo-version-downloads]: https://img.shields.io/nuget/dt/cake.repoversion?style=plastic
-[cake-repo-version-nuget]: https://www.nuget.org/packages/cake.repoversion
+[cake-repo-version-downloads]:       https://img.shields.io/nuget/dt/cake.repoversion?style=plastic
+[cake-repo-version-nuget]:           https://www.nuget.org/packages/cake.repoversion
 
 ## Quick Start
-
-Install
 
 ```bash
 dotnet tool install -g repo-version
 ```
 
-Update
+or
 
 ```bash
 dotnet tool update -g repo-version
 ```
+
+or
+
+```bash
+./build.sh --target Install
+```
+
+For more information about building from source please view the [Contributing](CONTRIBUTING.md) guide.
 
 You need to be somewhere within a git repository to run `repo-version`. Alternatively, you can provide a path as an argument.
 
@@ -250,6 +256,10 @@ It is important that you also include the addin for `Newtonsoft.Json` and it mus
 var repoVersion = RepoVersion();
 Information(repoVersion.SemVer);
 ```
+
+## Contributing
+
+PLEASE! Any contribution would be very much appreciated. Head over to the [Contributing](CONTRIBUTING.md) page for more information.
 
 ## Roadmap
 
