@@ -10,7 +10,7 @@ namespace repo_version
         public string Format { get; private set; }
         public bool ShowHelp { get; private set; }
         public string Verb { get; private set; }
-        public bool ShowVersion { get; private set; }
+        public bool ShowAssemblyVersion { get; private set; }
         public string Label { get; private set; }
 
         public string PrintHelp()
@@ -62,7 +62,7 @@ namespace repo_version
                         break;
                     case "-v":
                     case "--version":
-                        options.ShowVersion = true;
+                        options.ShowAssemblyVersion = true;
                         break;
                     case "-h":
                     case "--help":
