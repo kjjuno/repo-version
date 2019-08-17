@@ -4,7 +4,7 @@ using LibGit2Sharp;
 
 namespace repo_version
 {
-    class LabelCalculator
+    public class LabelCalculator : ILabelCalculator
     {
         public void CalculateLabel(Repository repo, Configuration config, out string label, out bool isMainline)
         {

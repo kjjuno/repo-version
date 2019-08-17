@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 
 namespace repo_version
 {
-    class RepoVersion : IComparable
+    public class RepoVersion : IComparable
     {
         private string _label;
 

@@ -19,13 +19,18 @@ namespace repo_version
             var code = 0;
             ICommand command = null;
 
+            var folderFinder = new GitFolderFinder();
+            var tagFinder = new TaggedVersionFinder();
+            var labelCalculator = new LabelCalculator();
+            var versionCalculator = new VersionCalculator(folderFinder, tagFinder, labelCalculator);
+
             if (options.ShowAssemblyVersion)
             {
                 command = new ShowAssemblyVersionCommand();
             }
             else if (options.Verb == "init")
             {
-                command = new InitConfigCommand();
+                command = new InitConfigCommand(versionCalculator);
             }
             else if (options.Verb == "major")
             {
@@ -37,11 +42,11 @@ namespace repo_version
             }
             else if (options.Verb == "tag")
             {
-                command = new TagCommand();
+                command = new TagCommand(versionCalculator, folderFinder);
             }
             else
             {
-                command = new DisplayVersionCommand();
+                command = new DisplayVersionCommand(versionCalculator);
             }
 
             code = command?.Execute(options) ?? -1;

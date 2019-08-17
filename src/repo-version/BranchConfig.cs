@@ -2,7 +2,7 @@ using Newtonsoft.Json;
 
 namespace repo_version
 {
-    class BranchConfig
+    public class BranchConfig
     {
         [JsonProperty("regex", Order = 0)]
         public string Regex { get; set; }

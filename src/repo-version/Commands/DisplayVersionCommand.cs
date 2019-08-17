@@ -3,12 +3,18 @@ using Newtonsoft.Json;
 
 namespace repo_version.Commands
 {
-    class DisplayVersionCommand : ICommand
+    public class DisplayVersionCommand : ICommand
     {
+        private readonly IVersionCalculator _calculator;
+
+        public DisplayVersionCommand(IVersionCalculator calculator)
+        {
+            _calculator = calculator;
+        }
+
         public int Execute(Options options)
         {
-            var calculator = new VersionCalculator();
-            var version = calculator.CalculateVersion(options);
+            var version = _calculator.CalculateVersion(options);
 
             if (version == null)
             {

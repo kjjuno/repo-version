@@ -9,6 +9,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{3AE071DB-C0B
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cake.RepoVersion", "src\Cake.RepoVersion\Cake.RepoVersion.csproj", "{F96D6510-753F-4266-9E6D-3BCF3660CD04}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{6419D418-E3FB-4324-AE80-22D4CE256861}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "repo-version.UnitTests", "test\repo-version.UnitTests\repo-version.UnitTests.csproj", "{29B28367-16F9-4E91-A5B0-9CE51EC36092}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -46,8 +50,21 @@ Global
 		{F96D6510-753F-4266-9E6D-3BCF3660CD04}.Release|x64.Build.0 = Release|Any CPU
 		{F96D6510-753F-4266-9E6D-3BCF3660CD04}.Release|x86.ActiveCfg = Release|Any CPU
 		{F96D6510-753F-4266-9E6D-3BCF3660CD04}.Release|x86.Build.0 = Release|Any CPU
+		{29B28367-16F9-4E91-A5B0-9CE51EC36092}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{29B28367-16F9-4E91-A5B0-9CE51EC36092}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{29B28367-16F9-4E91-A5B0-9CE51EC36092}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{29B28367-16F9-4E91-A5B0-9CE51EC36092}.Debug|x64.Build.0 = Debug|Any CPU
+		{29B28367-16F9-4E91-A5B0-9CE51EC36092}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{29B28367-16F9-4E91-A5B0-9CE51EC36092}.Debug|x86.Build.0 = Debug|Any CPU
+		{29B28367-16F9-4E91-A5B0-9CE51EC36092}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{29B28367-16F9-4E91-A5B0-9CE51EC36092}.Release|Any CPU.Build.0 = Release|Any CPU
+		{29B28367-16F9-4E91-A5B0-9CE51EC36092}.Release|x64.ActiveCfg = Release|Any CPU
+		{29B28367-16F9-4E91-A5B0-9CE51EC36092}.Release|x64.Build.0 = Release|Any CPU
+		{29B28367-16F9-4E91-A5B0-9CE51EC36092}.Release|x86.ActiveCfg = Release|Any CPU
+		{29B28367-16F9-4E91-A5B0-9CE51EC36092}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{F96D6510-753F-4266-9E6D-3BCF3660CD04} = {3AE071DB-C0B9-420D-92C5-C131CCDFDEE9}
+		{29B28367-16F9-4E91-A5B0-9CE51EC36092} = {6419D418-E3FB-4324-AE80-22D4CE256861}
 	EndGlobalSection
 EndGlobal

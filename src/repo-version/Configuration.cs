@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 
 namespace repo_version
 {
-    class Configuration
+    public class Configuration
     {
         [JsonProperty("major", Order = 0)]
         public int Major { get; set; } 

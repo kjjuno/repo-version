@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 namespace repo_version.Commands
 {
-    abstract class ModifyConfigCommand : ICommand
+    public abstract class ModifyConfigCommand : ICommand
     {
         private readonly bool _create;
 

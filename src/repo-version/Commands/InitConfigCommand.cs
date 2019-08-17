@@ -2,15 +2,18 @@ using System;
 
 namespace repo_version.Commands
 {
-    class InitConfigCommand : ModifyConfigCommand
+    public class InitConfigCommand : ModifyConfigCommand
     {
-        public InitConfigCommand() : base(create: true)
-        { }
+        private readonly IVersionCalculator _calculator;
+
+        public InitConfigCommand(IVersionCalculator calculator) : base(create: true)
+        {
+            _calculator = calculator;
+        }
 
         protected override void TransformConfiguration(Options options, Configuration config)
         {
-            var calculator = new VersionCalculator();
-            var version = calculator.CalculateVersion(options);
+            var version = _calculator.CalculateVersion(options);
 
             config.Major = version.Major;
             config.Minor = version.Minor;

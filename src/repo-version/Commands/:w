@@ -5,10 +5,9 @@ namespace repo_version.Commands
 {
     public class TagCommand : ICommand
     {
-        private readonly IVersionCalculator _calculator;
-        private readonly IGitFolderFinder _folderFinder;
+        private readonly VersionCalculator _calculator;
 
-        public TagCommand(IVersionCalculator calculator, IGitFolderFinder folderFinder)
+        public TagCommand(VersionCalculator calculator, IGitFolderFinder folderFinder)
         {
             _calculator = calculator;
             _folderFinder = folderFinder;
@@ -29,7 +28,7 @@ namespace repo_version.Commands
                 return 1;
             }
 
-            var gitFolder = _folderFinder.FindGitFolder(options.Path);
+            var gitFolder = finder.FindGitFolder(options.Path);
 
             using (var repo = new Repository(gitFolder))
             {

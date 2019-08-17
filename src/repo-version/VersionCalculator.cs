@@ -3,12 +3,22 @@ using LibGit2Sharp;
 
 namespace repo_version
 {
-    class VersionCalculator
+    public class VersionCalculator : IVersionCalculator
     {
+        private readonly IGitFolderFinder _folderFinder;
+        private readonly ITaggedVersionFinder _tagFinder;
+        private readonly ILabelCalculator _labelCalculator;
+
+        public VersionCalculator(IGitFolderFinder folderFinder, ITaggedVersionFinder tagFinder, ILabelCalculator labelCalculator)
+        {
+            _folderFinder = folderFinder;
+            _tagFinder = tagFinder;
+            _labelCalculator = labelCalculator;
+        }
+
         public RepoVersion CalculateVersion(Options options)
         {
-            var finder = new GitFolderFinder();
-            var gitFolder = finder.FindGitFolder(options.Path);
+            var gitFolder = _folderFinder.FindGitFolder(options.Path);
 
             if (gitFolder == null)
             {
@@ -24,8 +34,7 @@ namespace repo_version
             }
 
             var repo = new Repository(gitFolder);
-            var tagFinder = new TaggedVersionFinder();
-            var lastTag = tagFinder.GetLastTaggedVersion(repo, out var commitsSinceTag);
+            var lastTag = _tagFinder.GetLastTaggedVersion(repo, out var commitsSinceTag);
 
             var major = lastTag?.Major ?? config.Major;
             var minor = lastTag?.Minor ?? config.Minor;
@@ -68,8 +77,7 @@ namespace repo_version
                 patch = 0;
             }
 
-            var labelCalculator = new LabelCalculator();
-            labelCalculator.CalculateLabel(repo, config, out var configLabel, out var isMainline);
+            _labelCalculator.CalculateLabel(repo, config, out var configLabel, out var isMainline);
 
             // If we are exactly on a git tag use that pre-release value.
             if (lastTag != null && commitsSinceTag == 0 && !status.IsDirty)

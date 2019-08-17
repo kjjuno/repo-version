@@ -3,7 +3,7 @@ using LibGit2Sharp;
 
 namespace repo_version
 {
-    class TaggedVersionFinder
+    public class TaggedVersionFinder : ITaggedVersionFinder
     {
         public RepoVersion GetLastTaggedVersion(Repository repo, out int commitsSinceTag)
         {

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace repo_version
 {
-    class Options
+    public class Options
     {
         public string Path { get; private set; }
         public string Format { get; private set; }

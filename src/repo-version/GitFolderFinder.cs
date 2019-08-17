@@ -2,7 +2,7 @@ using System.IO;
 
 namespace repo_version
 {
-    class GitFolderFinder
+    public class GitFolderFinder : IGitFolderFinder
     {
         public string FindGitFolder(string path)
         {
