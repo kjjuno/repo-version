@@ -2,18 +2,14 @@
 
 Automatic versioning for git repositories based tags, and the number of commits since the last tag.
 
-| package          | version                                                                | downloads                                                        |
-| ---------------- | ---------------------------------------------------------------------- | ---------------------------------------------------------------- |
-| repo-version     | [![Nuget][repo-version-current-version]][repo-version-nuget]           | [![Nuget][repo-version-downloads]][repo-version-nuget]           |
-| Cake.RepoVersion | [![Nuget][cake-repo-version-current-version]][cake-repo-version-nuget] | [![Nuget][cake-repo-version-downloads]][cake-repo-version-nuget] |
+| package          | version                            | downloads                    |
+| ---------------- | ---------------------------------- | ---------------------------- |
+| repo-version     | [![Nuget][current-version]][nuget] | [![Nuget][downloads]][nuget] |
 
-[repo-version-current-version]:      https://img.shields.io/nuget/v/repo-version?style=plastic
-[repo-version-downloads]:            https://img.shields.io/nuget/dt/repo-version?style=plastic
-[repo-version-nuget]:                https://www.nuget.org/packages/repo-version
+[current-version]:      https://img.shields.io/nuget/v/repo-version?style=plastic
+[downloads]:            https://img.shields.io/nuget/dt/repo-version?style=plastic
+[nuget]:                https://www.nuget.org/packages/repo-version
 
-[cake-repo-version-current-version]: https://img.shields.io/nuget/v/cake.repoversion?style=plastic
-[cake-repo-version-downloads]:       https://img.shields.io/nuget/dt/cake.repoversion?style=plastic
-[cake-repo-version-nuget]:           https://www.nuget.org/packages/cake.repoversion
 
 ## Quick Start
 
@@ -240,22 +236,6 @@ repo-version tag -l ""
 
 This will apply the `3.2.5.122` tag, and that will complete the `3.2.5.x` version.
 If your branch config sepcifies `alpha` as the `defaultLabel` the next version would be `3.2.6.x-alpha`, where x is the number of commits since the `3.2.5.122` tag.
-
-## Cake.RepoVersion
-
-This is a simple wrapper around the repo-version dotnet tool. To use this in Cake you will need to include it as an addin.
-
-```bash
-#addin nuget:?package=Cake.RepoVersion&version=<version>
-#addin nuget:?package=Newtonsoft.Json&version=11.0.2
-```
-
-It is important that you also include the addin for `Newtonsoft.Json` and it must be `11.0.2`
-
-```bash
-var repoVersion = RepoVersion();
-Information(repoVersion.SemVer);
-```
 
 ## Contributing
 
