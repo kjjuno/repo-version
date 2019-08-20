@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 
 namespace repo_version
 {
-    public class RepoVersion : IComparable
+    public class RepoVersion : IComparable, IEquatable<RepoVersion>
     {
         private string _label;
 
@@ -108,5 +108,10 @@ namespace repo_version
 
             return this.Label.CompareTo(other.Label);
         }
-    }
+
+		public bool Equals(RepoVersion other)
+		{
+            return this.CompareTo(other) == 0;
+		}
+	}
 }

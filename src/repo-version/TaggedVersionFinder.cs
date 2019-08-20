@@ -5,7 +5,7 @@ namespace repo_version
 {
     public class TaggedVersionFinder : ITaggedVersionFinder
     {
-        public RepoVersion GetLastTaggedVersion(Repository repo, out int commitsSinceTag)
+        public RepoVersion GetLastTaggedVersion(IRepository repo, out int commitsSinceTag)
         {
             var queryTags = from t in repo.Tags
                 let commit = t.PeeledTarget
