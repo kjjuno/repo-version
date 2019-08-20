@@ -15,6 +15,10 @@ refactored to make it easier to test.
 1. .NET Core SDK 2.1 or greater
 2. mono (MacOS and Linux only)
 
+Or, click [here](https://gitpod.io#https://github.com/kjjuno/repo-version) to open a ready to go [Gitpod] environment
+
+[Gitpod]: https://gitpod.io
+
 ## How to build
 
 This project uses a cake build script. From a bash shell run the following command
@@ -28,13 +32,13 @@ optionally you can provide a specific target
 
 
 ```bash
-./build.sh --target Pack
+./build.sh --target <target>
 ```
 
 Available Targets:
 
 | Target    | Description                                |
 | --------- | ------------------------------------------ |
-| Pack      | Creates NuGet packages                     |
-| Publish   | Publishes nuget packages to nuget.org      |
+| Pack      | (Default) Creates NuGet package            |
+| Publish   | Publishes nuget package to nuget.org       |
 | Install   | Installs the repo-version tool from source |
