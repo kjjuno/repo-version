@@ -13,6 +13,16 @@ namespace repo_version
             isMainline = false;
             var branch = repo.Head.FriendlyName;
 
+            if (branch == "(no branch)")
+            {
+                var appveyor = (Environment.GetEnvironmentVariable("APPVEYOR") ?? "false").ToLower();
+
+                if (appveyor == "true")
+                {
+                    branch = Environment.GetEnvironmentVariable("APPVEYOR_REPO_BRANCH");
+                }
+            }
+
             if (config?.Branches != null)
             {
                 foreach (var branchConfig in config.Branches)
