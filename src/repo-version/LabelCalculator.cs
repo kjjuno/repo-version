@@ -13,33 +13,45 @@ namespace repo_version
             isMainline = false;
             var branch = repo.Head.FriendlyName;
 
+            // TODO: This needs to be reworked to more gracefully handle pull reqeusts
+            // from multiple server types.
             if (branch == "(no branch)")
             {
                 var appveyor = (Environment.GetEnvironmentVariable("APPVEYOR") ?? "false").ToLower();
 
                 if (appveyor == "true")
                 {
-                    branch = Environment.GetEnvironmentVariable("APPVEYOR_REPO_BRANCH");
-                }
-            }
+                    var pullRequestNumber = Environment.GetEnvironmentVariable("APPVEYOR_PULL_REQUEST_NUMBER");
+                    var pullRequestBranch = Environment.GetEnvironmentVariable("APPVEYOR_PULL_REQUEST_HEAD_REPO_BRANCH");
 
-            if (config?.Branches != null)
-            {
-                foreach (var branchConfig in config.Branches)
-                {
-                    if (Regex.IsMatch(branch, branchConfig.Regex))
+                    branch = Environment.GetEnvironmentVariable("APPVEYOR_REPO_BRANCH");
+
+                    if (!string.IsNullOrEmpty(pullRequestNumber) && !string.IsNullOrEmpty(pullRequestBranch))
                     {
-                        label = branchConfig.DefaultLabel ?? "";
-                        isMainline = branchConfig.IsMainline;
-                        found = true;
-                        break;
+                        label = $"pull-request-{pullRequestNumber}";
                     }
                 }
             }
-
-            if (!found)
+            else
             {
-                label = "{BranchName}";
+                if (config?.Branches != null)
+                {
+                    foreach (var branchConfig in config.Branches)
+                    {
+                        if (Regex.IsMatch(branch, branchConfig.Regex))
+                        {
+                            label = branchConfig.DefaultLabel ?? "";
+                            isMainline = branchConfig.IsMainline;
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!found)
+                {
+                    label = "{BranchName}";
+                }
             }
 
             if (label.Contains("{BranchName}"))
