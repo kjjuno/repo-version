@@ -32,7 +32,8 @@ namespace repo_version
                     }
                 }
             }
-            else
+
+            if (string.IsNullOrEmpty(label))
             {
                 if (config?.Branches != null)
                 {
