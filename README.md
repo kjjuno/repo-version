@@ -115,6 +115,13 @@ Applying a release version tag to the repository will reset the `commits` and in
 pre-release version tags will not increase the version numbers in any way, however the `label` will persist on main-line branches until a new tag changes or drops the label.
 Take a look at the [Configuration](#Configuration) section for more details on controlling the default label.
 
+### Pull Requests
+
+Pull Request versions are supported on the following CI Systems
+
+* AppVeyor
+* More to come... (If you need support for something in particular please open a feature request)
+
 ### Incrementing Major and Minor Versions
 
 `repo-version` will respect version tags. So, any manually applied tag will increase the version
