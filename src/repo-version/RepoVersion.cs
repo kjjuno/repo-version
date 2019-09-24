@@ -13,10 +13,10 @@ namespace repo_version
             {
                 if (!string.IsNullOrEmpty(Label))
                 {
-                    return $"{Major}.{Minor}.{Patch}.{Commits}-{Label}{DirtyString()}";
+                    return $"{Major}.{Minor}.{Patch}.{Commits}-{Label}";
                 }
 
-                return $"{Major}.{Minor}.{Patch}.{Commits}{DirtyString()}";
+                return $"{Major}.{Minor}.{Patch}.{Commits}";
             }
         }
         public int Major { get; set; }
@@ -33,13 +33,6 @@ namespace repo_version
         public override string ToString()
         {
             return SemVer;
-        }
-
-        private string DirtyString()
-        {
-            return IsDirty
-                ? "+1"
-                : "";
         }
         
         private static int ParseInt(string input)
