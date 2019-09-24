@@ -40,7 +40,7 @@ run `repo-version` to calculate the current version
 
 ```bash
 repo-version
-1.2.3.2-fix-null-reference+1
+1.2.3.2-fix-null-reference
 ```
 
 or for more verbose output
@@ -48,7 +48,7 @@ or for more verbose output
 ```bash
 repo-version -o json
 {
-    "SemVer": "1.2.3.2-fix-null-reference+1",
+    "SemVer": "1.2.3.2-fix-null-reference",
     "Major": "1",
     "Minor": "2",
     "Patch": "3",
@@ -59,7 +59,7 @@ repo-version -o json
 
 ```
 
-Because you have local changes that have not yet been committed the version is considered dirty and appends the `+1` to the calculated version to indicate that there are additional changes.
+Because you have local changes that have not yet been committed the version is considered dirty. This fact is not reflected in the `SemVer` property, but is available in the `IsDirty` property.
 
 For this example we have decided that we want to keep those changes, so we commit those to the git history.
 
@@ -68,7 +68,7 @@ repo-version
 1.2.3.3-fix-null-reference
 ```
 
-Note that the number of commits went up, and the dirty indicator was dropped.
+Note that the number of commits went up.
 
 Now, let's say that your branch is ready to be merged, and you use a merge commit strategy. This will add 1 more commit.
 
