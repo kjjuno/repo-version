@@ -92,7 +92,8 @@ namespace repo_version
 
             label = label
                 .Substring(0, Math.Min(30, label.Length))
-                .TrimEnd('-');
+                .TrimEnd('-')
+                .TrimEnd('.');
         }
     }
 }
