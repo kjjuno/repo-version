@@ -18,6 +18,7 @@ namespace repo_version
             if (branch == "(no branch)")
             {
                 var appveyor = (Environment.GetEnvironmentVariable("APPVEYOR") ?? "false").ToLower();
+                var gitBranch = Environment.GetEnvironmentVariable("Git_Branch");
 
                 if (appveyor == "true")
                 {
@@ -31,7 +32,22 @@ namespace repo_version
                         label = $"pull-request-{pullRequestNumber}";
                     }
                 }
+                else if (!string.IsNullOrEmpty(gitBranch))
+                {
+                    branch = gitBranch;
+                }
             }
+
+            var pullRequestMatch = Regex.Match(branch, @"(?<bitbucket>refs/pull-requests/(?<prnumber>\d+)/merge)");
+            if (pullRequestMatch.Success)
+            {
+                if (pullRequestMatch.Groups["bitbucket"].Success)
+                {
+                    var pullRequestNumber = pullRequestMatch.Groups["prnumber"].Value;
+                    label = $"pull-request-{pullRequestNumber}";
+                }
+            }
+
 
             if (string.IsNullOrEmpty(label))
             {
