@@ -24,7 +24,7 @@ namespace repo_version.Commands
                 Console.WriteLine(version.SemVer);
             }
 
-            return 1;
+            return 0;
         }
     }
 }
