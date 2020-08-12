@@ -16,8 +16,16 @@ namespace repo_version
                     return $"{Major}.{Minor}.{Patch}.{Commits}-{Label}";
                 }
 
-                return $"{Major}.{Minor}.{Patch}.{Commits}";
+                return $"{Major}.{Minor}.{Patch}";
             }
+        }
+
+        public string NuGetVersion
+        {
+           get
+           {
+               return $"{Major}.{Minor}.{Patch}";
+           } 
         }
         public int Major { get; set; }
         public int Minor { get; set; }
